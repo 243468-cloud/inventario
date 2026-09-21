@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MapPin, ShieldAlert, Loader2 } from '@/components/Icons';
+import { MapPin, ShieldAlert, Loader2 } from 'lucide-react';
 
 // Coordenadas de la sucursal (Playa del Carmen)
 const BRANCH_LAT = 20.6710;

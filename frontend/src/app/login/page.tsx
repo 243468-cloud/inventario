@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { HexagonIcon } from '@/components/Icons';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/apiClient';
 
 type Mode = 'login' | 'register';
 
@@ -30,9 +31,8 @@ export default function Login() {
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch('http://localhost:8080/api/auth/login', {
+      const res = await apiFetch('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
       if (res.ok) {
@@ -64,9 +64,8 @@ export default function Login() {
     }
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:8080/api/auth/register', {
+      const res = await apiFetch('/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
       const data = await res.json();

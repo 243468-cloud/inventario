@@ -14,9 +14,15 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3001", "http://localhost:3000") // Next.js port
+                        .allowedOriginPatterns(
+                            "http://localhost:3000",
+                            "http://localhost:3001",
+                            "https://inventario-frontend-gules-tau.vercel.app",
+                            "https://*.vercel.app"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
+                        .allowedHeaders("*")
+                        .allowCredentials(true);
             }
         };
     }

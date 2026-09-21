@@ -1,7 +1,9 @@
 import { cookies } from 'next/headers'
-import { DownloadIcon, FileTextIcon, PackageIcon, HexagonIcon, AlertTriangleIcon, PlusIcon } from '@/components/Icons'
+import { DownloadIcon, FileTextIcon, PackageIcon, HexagonIcon, AlertTriangleIcon } from '@/components/Icons'
 import Link from 'next/link'
 import { InventoryItem } from '@/types'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +11,7 @@ async function getInventory(): Promise<InventoryItem[]> {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   try {
-    const res = await fetch('http://localhost:8080/api/inventory/real-time', { 
+    const res = await fetch(`${API_URL}/inventory/real-time`, { 
       cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -26,7 +28,7 @@ async function getInventoryItems(): Promise<any[]> {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   try {
-    const res = await fetch('http://localhost:8080/api/almacen/items', { 
+    const res = await fetch(`${API_URL}/almacen/items`, { 
       cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -67,7 +69,7 @@ export default async function Dashboard() {
         <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
             <a
               id="btn-export-excel"
-              href={`http://localhost:8080/api/reports/export/inventory?token=${token}`}
+              href={`${API_URL}/reports/export/inventory?token=${token}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 h-12 bg-white text-[#1f3d2e] border border-gray-200 font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-md hover:border-[#1f3d2e]/30 transition-all active:scale-[0.98] shadow-sm w-full sm:w-auto"
@@ -77,7 +79,7 @@ export default async function Dashboard() {
             </a>
             <a
               id="btn-export-pdf"
-              href={`http://localhost:8080/api/reports/export/pdf?token=${token}`}
+              href={`${API_URL}/reports/export/pdf?token=${token}`}
               target="_blank"
               rel="noopener noreferrer"
               className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 h-12 bg-gradient-to-r from-[#c96f4a] to-[#b85c37] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(201,111,74,0.5)] transition-all active:scale-[0.98] shadow-sm w-full sm:w-auto"

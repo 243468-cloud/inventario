@@ -82,4 +82,4 @@ CREATE TABLE users (
 
 -- Insert default admin user (username: admin, password: admin)
 -- Hash generated via BCrypt (strength 12) actualizado para producción
-INSERT INTO users (username, password_hash, role) VALUES ('admin', '$2a$12$KkQnZ38Gk9.wJ.o9gR4g3e.B0uV0z7s8hX4m9P6D9Xf0x/2T3B9Z.v', 'SUPER_ADMIN');
+INSERT INTO users (username, password_hash, role) VALUES ('Orion', '$2a$12$KkQnZ38Gk9.wJ.o9gR4g3e.B0uV0z7s8hX4m9P6D9Xf0x/2T3B9Z.v', 'SUPER_ADMIN');

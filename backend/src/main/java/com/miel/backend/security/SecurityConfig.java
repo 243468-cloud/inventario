@@ -68,8 +68,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // API stateless con JWT — CSRF no aplica
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Solo login es público. Register requiere autenticación (se protege por rol en el controlador)
+                // Login público. Push: la suscripción se registra con el token del frontend
                 .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/push/vapid-public-key").permitAll()
                 .anyRequest().authenticated()
             )
             // ── Security Headers ─────────────────────────────────────────────

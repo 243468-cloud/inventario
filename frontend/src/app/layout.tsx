@@ -3,6 +3,7 @@ import { Outfit } from 'next/font/google'
 import './globals.css'
 import { cookies } from 'next/headers'
 import NavBar from '@/components/NavBar'
+import PushNotificationSetup from '@/components/PushNotificationSetup'
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
 
@@ -31,6 +32,7 @@ export default async function RootLayout({
         </div>
 
         {token && <NavBar role={role} />}
+        {token && <PushNotificationSetup />}
 
         <main className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 ${token ? 'pt-24 pb-12' : 'min-h-screen flex items-center justify-center'}`}>
           {children}

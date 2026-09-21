@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: miel-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: miel_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password123
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - miel-network
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: miel-backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      # Sobrescribimos variables para que el backend se conecte a la DB de Docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/miel_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password123
+      - APP_JWT_SECRET=${APP_JWT_SECRET:-INSERTA_AQUI_UN_SECRETO_ALEATORIO_LARGO_DE_AL_MENOS_64_CARACTERES_EN_PRODUCCION}
+    ports:
+      - "8080:8080"
+    networks:
+      - miel-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: miel-frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+      # La URL a la que el navegador enviará peticiones API.
+      # En un VPS o producción, cambiar 'localhost' por el dominio real.
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+    ports:
+      - "3000:3000"
+    networks:
+      - miel-network
+
+networks:
+  miel-network:
+    driver: bridge
+
+volumes:
+  mysqldata:

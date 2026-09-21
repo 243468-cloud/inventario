@@ -24,16 +24,6 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Selva Maya',
   },
-  icons: {
-    icon: [
-      { url: '/apple-touch-icon.png' },
-      { url: '/app-icon.png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    shortcut: ['/apple-touch-icon.png'],
-  },
 }
 
 export default async function RootLayout({
@@ -49,10 +39,10 @@ export default async function RootLayout({
     <html lang="es">
       <head>
         {/* iOS Apple Touch Icon - REQUIRED for home screen icon on iPhone/iPad */}
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png" />
-        <link rel="shortcut icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
+        <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=2" />
+        <link rel="shortcut icon" href="/apple-touch-icon.png?v=2" />
       </head>
       <body className={`${outfit.variable} font-sans bg-gradient-to-br from-[#fffdf5] via-[#f1f6f3] to-[#e8f0eb] min-h-screen text-[#2c4c3b] selection:bg-[#e07a5f] selection:text-white`}>
         {/* Decorative background shapes */}

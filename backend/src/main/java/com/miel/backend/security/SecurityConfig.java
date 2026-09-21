@@ -71,7 +71,7 @@ public class SecurityConfig {
                 // Preflight OPTIONS siempre debe pasar sin autenticación
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                .requestMatchers("/push/vapid-public-key").permitAll()
+                .requestMatchers("/api/push/vapid-public-key").permitAll()
                 .anyRequest().authenticated()
             )
             // ── Security Headers ─────────────────────────────────────────────

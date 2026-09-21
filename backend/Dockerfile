@@ -5,8 +5,8 @@ COPY pom.xml .
 # Descargar dependencias para hacer caché
 RUN mvn dependency:go-offline -B
 COPY src ./src
-# Compilar el proyecto empaquetando todo en un .jar
-RUN mvn clean package -DskipTests
+# Compilar limitando memoria del proceso Maven para no exceder 512MB en Render
+RUN MAVEN_OPTS="-Xmx384m -XX:MaxMetaspaceSize=128m" mvn clean package -DskipTests
 
 # Etapa 2: Imagen de Producción (Ligera)
 FROM eclipse-temurin:17-jre-alpine
@@ -20,5 +20,6 @@ ENV SPRING_PROFILES_ACTIVE=production
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080
-# Iniciar la aplicación de manera optimizada
-ENTRYPOINT ["java", "-XX:+UseZGC", "-Xmx512m", "-jar", "app.jar"]
+# SerialGC usa menos memoria que ZGC — ideal para instancias pequeñas
+# Heap 220m + Metaspace ~120m + overhead nativo ~100m < 512m total
+ENTRYPOINT ["java", "-XX:+UseSerialGC", "-Xmx220m", "-XX:MaxMetaspaceSize=120m", "-jar", "app.jar"]

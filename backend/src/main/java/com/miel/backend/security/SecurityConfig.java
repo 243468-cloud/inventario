@@ -27,7 +27,7 @@ import java.util.List;
 public class SecurityConfig {
 
     /** Dominios permitidos — configurable via variable de entorno */
-    @Value("${app.cors.allowedOrigins:http://localhost:3000,http://localhost:3001}")
+    @Value("${app.cors.allowedOrigins:http://localhost:3000,http://localhost:3001,https://inventario-frontend-gules-tau.vercel.app,https://*.vercel.app}")
     private String allowedOriginsRaw;
 
     @Bean
@@ -49,9 +49,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         List<String> origins = Arrays.asList(allowedOriginsRaw.split(","));
-        config.setAllowedOrigins(origins);
+        // setAllowedOriginPatterns soporta wildcards (e.g. https://*.vercel.app)
+        config.setAllowedOriginPatterns(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Solo headers necesarios — no wildcard (*)
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
@@ -68,8 +68,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // API stateless con JWT — CSRF no aplica
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Login público. Push: la suscripción se registra con el token del frontend
-                .requestMatchers("/api/auth/login").permitAll()
+                // Preflight OPTIONS siempre debe pasar sin autenticación
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/push/vapid-public-key").permitAll()
                 .anyRequest().authenticated()
             )

@@ -10,6 +10,25 @@ const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' })
 export const metadata: Metadata = {
   title: 'Miel de las Abejas de la Selva Maya',
   description: 'Sistema de Gestión de Inventario Premium',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Selva Maya',
+  },
+  icons: {
+    icon: [
+      { url: '/app-icon.png' },
+      { url: '/icon.png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: ['/app-icon.png'],
+  },
+  themeColor: '#fffdf5',
+  viewport: 'minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, viewport-fit=cover',
 }
 
 export default async function RootLayout({

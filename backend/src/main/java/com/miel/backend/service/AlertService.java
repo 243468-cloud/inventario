@@ -35,7 +35,7 @@ public class AlertService {
                         item.get("min_stock")));
             }
 
-            String title = "⚠️ Alerta de Stock Bajo";
+            String title = " Alerta de Stock Bajo";
             pushNotificationService.sendToAll(title, body.toString().trim());
             System.out.println("[ALERTA] Push enviado: " + lowStockItems.size() + " producto(s) con stock bajo.");
         }

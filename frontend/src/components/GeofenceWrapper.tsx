@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, ShieldAlert, Loader2 } from 'lucide-react';
 
 // Coordenadas de la sucursal (Playa del Carmen)
-const BRANCH_LAT = 20.6710;
-const BRANCH_LON = -87.0754;
+const BRANCH_LAT = 20.671892;
+const BRANCH_LON = -87.073463;
 const ALLOWED_RADIUS_METERS = 150; // Margen de 150 metros
 
 // Función Haversine para calcular distancia entre dos coordenadas en metros
@@ -34,6 +34,15 @@ export default function GeofenceWrapper({ children }: GeofenceWrapperProps) {
   const [distance, setDistance] = useState<number | null>(null);
 
   useEffect(() => {
+    // Si el usuario es SUPER_ADMIN, omitir la verificación de geocerca
+    const roleMatch = document.cookie.match(new RegExp('(^| )user_role=([^;]+)'));
+    const role = roleMatch ? decodeURIComponent(roleMatch[2]) : null;
+    
+    if (role === 'SUPER_ADMIN') {
+      setIsWithinFence(true);
+      return;
+    }
+
     if (!('geolocation' in navigator)) {
       setError('Tu dispositivo no soporta GPS. No puedes modificar el inventario desde aquí.');
       return;

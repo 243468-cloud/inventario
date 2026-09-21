@@ -26,8 +26,7 @@ export default function Login() {
     setConfirmPassword('');
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performLogin = async () => {
     setIsLoading(true);
     setError('');
     try {
@@ -39,15 +38,22 @@ export default function Login() {
         const data = await res.json();
         document.cookie = `auth_token=${data.accessToken}; path=/; max-age=86400; SameSite=Strict`;
         document.cookie = `user_role=${data.role}; path=/; max-age=86400; SameSite=Strict`;
-        router.push('/');
+        // Usamos window.location.href en lugar de router.push para forzar 
+        // a Next.js a recargar el layout.tsx desde el servidor y mostrar el NavBar.
+        window.location.href = '/';
       } else {
         setError('Usuario o contraseña incorrectos.');
+        setIsLoading(false);
       }
     } catch {
       setError('Error al conectar con el servidor.');
-    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await performLogin();
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -70,14 +76,14 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccess('¡Cuenta creada! Ya puedes iniciar sesión.');
-        setTimeout(() => reset('login'), 1500);
+        setSuccess('¡Cuenta creada! Ingresando...');
+        await performLogin();
       } else {
         setError(data.message || 'Error al registrar usuario.');
+        setIsLoading(false);
       }
     } catch {
       setError('Error al conectar con el servidor.');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -173,7 +179,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 required
                 pattern="^[^<>]{6,50}$"
-                title="La contraseña no debe contener los caracteres < o >"
+                title="La contraseña debe tener entre 6 y 50 caracteres y no contener < o >"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 pr-12 focus:outline-none focus:ring-4 focus:ring-[#2c4c3b]/20 focus:border-[#2c4c3b] transition-all font-medium text-[#2c4c3b] hover:bg-white/80"
@@ -203,7 +209,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 required
                 pattern="^[^<>]{6,50}$"
-                title="La contraseña no debe contener los caracteres < o >"
+                title="La contraseña debe tener entre 6 y 50 caracteres y no contener < o >"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-[#2c4c3b]/20 focus:border-[#2c4c3b] transition-all font-medium text-[#2c4c3b] hover:bg-white/80"

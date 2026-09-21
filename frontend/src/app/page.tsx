@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
-import { DownloadIcon, FileTextIcon, PackageIcon, HexagonIcon, AlertTriangleIcon } from '@/components/Icons'
+import { PackageIcon, HexagonIcon, AlertTriangleIcon } from '@/components/Icons'
+import ExportButtons from '@/components/ExportButtons'
 import Link from 'next/link'
 import { InventoryItem } from '@/types'
 
@@ -66,29 +67,7 @@ export default async function Dashboard() {
           </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
-            <a
-              id="btn-export-excel"
-              href={`${API_URL}/reports/export/inventory?token=${token}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 h-12 bg-white text-[#1f3d2e] border border-gray-200 font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-md hover:border-[#1f3d2e]/30 transition-all active:scale-[0.98] shadow-sm w-full sm:w-auto"
-            >
-              <DownloadIcon className="w-5 h-5 text-[#1f3d2e]/70 group-hover:text-[#1f3d2e] transition-colors" />
-              Excel
-            </a>
-            <a
-              id="btn-export-pdf"
-              href={`${API_URL}/reports/export/pdf?token=${token}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative overflow-hidden flex items-center justify-center gap-2 px-6 h-12 bg-gradient-to-r from-[#c96f4a] to-[#b85c37] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(201,111,74,0.5)] transition-all active:scale-[0.98] shadow-sm w-full sm:w-auto"
-            >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-              <FileTextIcon className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">PDF</span>
-            </a>
-        </div>
+        <ExportButtons token={token} />
       </div>
 
       {/* KPI Cards with hover effects and consistent shadows */}

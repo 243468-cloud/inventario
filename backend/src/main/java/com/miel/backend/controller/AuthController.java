@@ -93,10 +93,9 @@ public class AuthController {
 
     /**
      * Registro de nuevos usuarios.
-     * PROTEGIDO: Solo usuarios con rol ADMIN pueden crear nuevas cuentas.
+     * Público: Cualquiera puede registrarse con rol básico de empleado.
      */
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerEmployee(@Valid @RequestBody RegisterRequest req) {
         if (userRepository.findByUsername(req.getUsername().trim()).isPresent()) {
             // Mismo mensaje tanto si existe como si no — evita enumeración

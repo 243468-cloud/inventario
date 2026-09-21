@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircleIcon, AlertCircleIcon, PackageOpenIcon, ArrowRightCircleIcon, HexagonIcon } from '@/components/Icons';
 import { Presentacion } from '@/types';
 import { apiFetch } from '@/lib/apiClient';
+import GeofenceWrapper from '@/components/GeofenceWrapper';
 
 function StepCard({ number, title, desc }: { number: string; title: string; desc: string }) {
   return (
@@ -69,18 +70,19 @@ export default function Produccion() {
     : null;
 
   return (
-    <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#e07a5f] to-[#e89a85] text-white shadow-lg shadow-[#e07a5f]/25 flex items-center justify-center flex-shrink-0">
-          <PackageOpenIcon />
+    <div className="min-h-screen bg-[#f8f9fa] pb-12 font-sans selection:bg-[#2c4c3b] selection:text-white">
+      <GeofenceWrapper>
+        <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#e07a5f] to-[#e89a85] text-white shadow-lg shadow-[#e07a5f]/25 flex items-center justify-center flex-shrink-0">
+            <PackageOpenIcon />
+          </div>
+          <div>
+            <h2 className="text-3xl font-black text-[#2c4c3b] tracking-tight">Captura de Producción</h2>
+            <p className="text-gray-500 text-sm mt-0.5">Registra un lote de envasado de miel</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-3xl font-black text-[#2c4c3b] tracking-tight">Captura de Producción</h2>
-          <p className="text-gray-500 text-sm mt-0.5">Registra un lote de envasado de miel</p>
-        </div>
-      </div>
 
       {/* How it works */}
       <div className="bg-[#f1f6f3]/80 backdrop-blur border border-[#2c4c3b]/10 rounded-2xl p-5 mb-6">
@@ -206,6 +208,8 @@ export default function Produccion() {
           </button>
         </form>
       </div>
+      </div>
+      </GeofenceWrapper>
     </div>
   );
 }

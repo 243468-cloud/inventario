@@ -48,14 +48,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extrae el JWT exclusivamente del header Authorization: Bearer <token>
-     * No se acepta token vía query param (?token=...) para evitar filtración en logs del servidor.
+     * Extrae el JWT del header Authorization (Bearer token)
+     * Como fallback para descargas de archivos (exportar PDF/Excel via <a href>),
+     * permite extraerlo del query param ?token=...
      */
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
+        
+        // Fallback para endpoints de exportación (ej: /reports/export/pdf?token=abc)
+        String queryToken = request.getParameter("token");
+        if (StringUtils.hasText(queryToken)) {
+            return queryToken;
+        }
+        
         return null;
     }
 }

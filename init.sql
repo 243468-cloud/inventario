@@ -1,8 +1,14 @@
--- TABLAS PARA MYSQL
-CREATE DATABASE IF NOT EXISTS miel_db;
-USE miel_db;
+-- ==============================================================================
+-- SCRIPT DE INICIALIZACIÓN COMPLETO DE BASE DE DATOS
+-- Compatible con Aiven (defaultdb) y MySQL Local (miel_db)
+-- Incluye tablas de sistema, usuario admin e inventario físico (07/10/2026)
+-- ==============================================================================
 
-CREATE TABLE presentations (
+-- Si estás en Aiven, descomenta o asegúrate de estar en defaultdb:
+-- USE defaultdb;
+
+-- 1. PRESENTACIONES DE PRODUCTO TERMINADO
+CREATE TABLE IF NOT EXISTS presentations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     weight_grams DECIMAL(10,2) NOT NULL,
@@ -10,42 +16,42 @@ CREATE TABLE presentations (
     min_stock INT DEFAULT 0,
     container_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00
 );
--- Índice para buscar presentaciones activas y ordenar por peso más rápido
-CREATE INDEX idx_presentations_active_weight ON presentations(is_active, weight_grams);
+CREATE INDEX IF NOT EXISTS idx_presentations_active_weight ON presentations(is_active, weight_grams);
 
-CREATE TABLE bulk_honey_inventory (
+-- 2. INVENTARIO A GRANEL HISTÓRICO
+CREATE TABLE IF NOT EXISTS bulk_honey_inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     current_stock_kg DECIMAL(10,2) NOT NULL DEFAULT 0
 );
+INSERT IGNORE INTO bulk_honey_inventory (id, current_stock_kg) VALUES (1, 0);
 
--- Iniciar con 0 kg
-INSERT INTO bulk_honey_inventory (id, current_stock_kg) VALUES (1, 0);
-
-CREATE TABLE presentation_stock (
+-- 3. STOCK DE PRESENTACIONES
+CREATE TABLE IF NOT EXISTS presentation_stock (
     presentation_id INT PRIMARY KEY,
     current_stock INT NOT NULL DEFAULT 0,
     FOREIGN KEY (presentation_id) REFERENCES presentations(id)
 );
 
-CREATE TABLE raw_material_cost_history (
+-- 4. COSTOS DE MATERIA PRIMA
+CREATE TABLE IF NOT EXISTS raw_material_cost_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cost_per_kg DECIMAL(10,2) NOT NULL,
     effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
--- Índice para obtener rápidamente el costo más reciente
-CREATE INDEX idx_raw_material_cost_date ON raw_material_cost_history(effective_date DESC);
+CREATE INDEX IF NOT EXISTS idx_raw_material_cost_date ON raw_material_cost_history(effective_date DESC);
 
-CREATE TABLE sale_price_history (
+-- 5. HISTORIAL DE PRECIOS DE VENTA
+CREATE TABLE IF NOT EXISTS sale_price_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     presentation_id INT,
     sale_price DECIMAL(10,2) NOT NULL,
     effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (presentation_id) REFERENCES presentations(id)
 );
--- Índice compuesto (presentation_id + effective_date) muy útil para sacar el último precio por presentación
-CREATE INDEX idx_sale_price_history_presentation_date ON sale_price_history(presentation_id, effective_date DESC);
+CREATE INDEX IF NOT EXISTS idx_sale_price_history_presentation_date ON sale_price_history(presentation_id, effective_date DESC);
 
-CREATE TABLE production_batches (
+-- 6. LOTES DE PRODUCCIÓN
+CREATE TABLE IF NOT EXISTS production_batches (
     id INT AUTO_INCREMENT PRIMARY KEY,
     presentation_id INT,
     quantity_produced INT NOT NULL,
@@ -53,33 +59,105 @@ CREATE TABLE production_batches (
     production_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (presentation_id) REFERENCES presentations(id)
 );
--- Índices para reportes de producción por fecha y/o presentación
-CREATE INDEX idx_production_batches_date ON production_batches(production_date DESC);
-CREATE INDEX idx_production_batches_presentation ON production_batches(presentation_id, production_date DESC);
+CREATE INDEX IF NOT EXISTS idx_production_batches_date ON production_batches(production_date DESC);
+CREATE INDEX IF NOT EXISTS idx_production_batches_presentation ON production_batches(presentation_id, production_date DESC);
 
-CREATE TABLE stock_movements (
+-- 7. MOVIMIENTOS DE STOCK
+CREATE TABLE IF NOT EXISTS stock_movements (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    item_type VARCHAR(50) NOT NULL, -- 'BULK_HONEY', 'PRESENTATION'
-    presentation_id INT, -- Null para BULK_HONEY
-    movement_type VARCHAR(10) NOT NULL, -- 'IN', 'OUT'
-    quantity DECIMAL(10,2) NOT NULL, -- kg para miel, unidades para presentaciones
-    reference_type VARCHAR(50) NOT NULL, -- 'PRODUCTION_BATCH', 'MANUAL_ADJUSTMENT'
+    item_type VARCHAR(50) NOT NULL,
+    presentation_id INT,
+    movement_type VARCHAR(10) NOT NULL,
+    quantity DECIMAL(10,2) NOT NULL,
+    reference_type VARCHAR(50) NOT NULL,
     reference_id INT,
     movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (presentation_id) REFERENCES presentations(id)
 );
--- Índices clave para los reportes de balance general (historial de movimientos)
-CREATE INDEX idx_stock_movements_type_date ON stock_movements(item_type, movement_date DESC);
-CREATE INDEX idx_stock_movements_presentation_date ON stock_movements(presentation_id, movement_date DESC);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_type_date ON stock_movements(item_type, movement_date DESC);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_presentation_date ON stock_movements(presentation_id, movement_date DESC);
 
-CREATE TABLE users (
+-- 8. USUARIOS
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL DEFAULT 'authenticated'
 );
--- El username ya tiene un constraint UNIQUE, lo que automáticamente crea un índice, no se necesita crear otro adicional para login.
 
--- Insert default admin user (username: admin, password: admin)
--- Hash generated via BCrypt (strength 12) actualizado para producción
-INSERT INTO users (username, password_hash, role) VALUES ('Orion', '$2a$12$KkQnZ38Gk9.wJ.o9gR4g3e.B0uV0z7s8hX4m9P6D9Xf0x/2T3B9Z.v', 'SUPER_ADMIN');
+-- Usuario Administrador por defecto (Orion)
+INSERT IGNORE INTO users (id, username, password_hash, role) 
+VALUES (1, 'Orion', '$2a$12$KkQnZ38Gk9.wJ.o9gR4g3e.B0uV0z7s8hX4m9P6D9Xf0x/2T3B9Z.v', 'SUPER_ADMIN');
+
+-- 9. NOTIFICACIONES PUSH
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    endpoint VARCHAR(512) NOT NULL UNIQUE,
+    p256dh VARCHAR(256) NOT NULL,
+    auth VARCHAR(128) NOT NULL
+);
+
+-- 10. ALMACÉN Y MATERIA PRIMA (inventory_items)
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    unit VARCHAR(50) NOT NULL,
+    current_stock DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    cost_per_unit DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    min_stock DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+-- 11. ENTRADAS DE ALMACÉN
+CREATE TABLE IF NOT EXISTS purchase_entries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    inventory_item_id INT NOT NULL,
+    format_type VARCHAR(50) NOT NULL,
+    format_quantity DECIMAL(10,2) NOT NULL,
+    total_base_quantity DECIMAL(10,2) NOT NULL,
+    entry_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 12. RECETAS POR PRESENTACIÓN
+CREATE TABLE IF NOT EXISTS recipe_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    presentation_id INT NOT NULL,
+    inventory_item_id INT NOT NULL,
+    quantity_required DECIMAL(10,2) NOT NULL
+);
+
+-- ==============================================================================
+-- CARGA DE INVENTARIO FÍSICO — 07 DE OCTUBRE 2026
+-- ==============================================================================
+
+-- A) ENVASES VACÍOS (CONTAINER)
+INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+('Envase 5 kg',          'CONTAINER', 'PIECE', 120,   0.00, 0, true),
+('Caja 30 gr (pza)',     'CONTAINER', 'PIECE', 3888,  0.00, 0, true), -- 81 cajas (3,888 pza)
+('Envase 950 gr',        'CONTAINER', 'PIECE', 680,   0.00, 0, true),
+('Caja 330 gr (pza)',    'CONTAINER', 'PIECE', 276,   0.00, 0, true); -- 23 cajas (276 pza)
+
+-- B) MIEL Y SUS DERIVADOS (BULK_HONEY)
+INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+('Panal',                    'BULK_HONEY', 'PIECE',  0,    0.00, 0, true),
+('Polen',                    'BULK_HONEY', 'PIECE',  4,    0.00, 0, true),
+('Cubeta Miel Pura',         'BULK_HONEY', 'PIECE',  32,   0.00, 0, true),
+('Galon Agave',              'BULK_HONEY', 'PIECE',  68.5, 0.00, 0, true), -- 68 y 1/2
+('Cubeta Miel con Limon',    'BULK_HONEY', 'PIECE',  4,    0.00, 0, true),
+('Cubeta Miel con Gengibre', 'BULK_HONEY', 'PIECE',  2,    0.00, 0, true),
+('Cubeta Miel Exportacion',  'BULK_HONEY', 'PIECE',  24,   0.00, 0, true),
+('Cubeta Miel con Polen',    'BULK_HONEY', 'PIECE',  3,    0.00, 0, true);
+
+-- C) QUESOS (CHEESE)
+INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+('Queso Ocosingo',          'CHEESE', 'PIECE', 10, 0.00, 0, true),
+('Queso Excelsior',         'CHEESE', 'PIECE',  1, 0.00, 0, true),
+('Queso de Origen Vegetal', 'CHEESE', 'PIECE',  2, 0.00, 0, true),
+('Queso Mantequilla',       'CHEESE', 'PIECE',  9, 0.00, 0, true);
+
+-- D) EXTRAS (OTHER)
+INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+('Vinagre',    'OTHER', 'PIECE', 2,  0.00, 0, true),
+('Granola',    'OTHER', 'PIECE', 0,  0.00, 0, true),
+('San Marino', 'OTHER', 'PIECE', 11, 0.00, 0, true);

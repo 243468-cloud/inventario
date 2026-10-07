@@ -1,11 +1,7 @@
 -- ==============================================================================
 -- SCRIPT DE INICIALIZACIÓN COMPLETO DE BASE DE DATOS
--- Compatible con Aiven (defaultdb) y MySQL Local (miel_db)
--- Incluye tablas de sistema, usuario admin e inventario físico (07/10/2026)
+-- 100% compatible con MySQL 8.x / Aiven (defaultdb)
 -- ==============================================================================
-
--- Si estás en Aiven, descomenta o asegúrate de estar en defaultdb:
--- USE defaultdb;
 
 -- 1. PRESENTACIONES DE PRODUCTO TERMINADO
 CREATE TABLE IF NOT EXISTS presentations (
@@ -14,9 +10,9 @@ CREATE TABLE IF NOT EXISTS presentations (
     weight_grams DECIMAL(10,2) NOT NULL,
     is_active BOOLEAN DEFAULT true,
     min_stock INT DEFAULT 0,
-    container_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00
+    container_cost DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    INDEX idx_presentations_active_weight (is_active, weight_grams)
 );
-CREATE INDEX IF NOT EXISTS idx_presentations_active_weight ON presentations(is_active, weight_grams);
 
 -- 2. INVENTARIO A GRANEL HISTÓRICO
 CREATE TABLE IF NOT EXISTS bulk_honey_inventory (
@@ -36,9 +32,9 @@ CREATE TABLE IF NOT EXISTS presentation_stock (
 CREATE TABLE IF NOT EXISTS raw_material_cost_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cost_per_kg DECIMAL(10,2) NOT NULL,
-    effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_raw_material_cost_date (effective_date DESC)
 );
-CREATE INDEX IF NOT EXISTS idx_raw_material_cost_date ON raw_material_cost_history(effective_date DESC);
 
 -- 5. HISTORIAL DE PRECIOS DE VENTA
 CREATE TABLE IF NOT EXISTS sale_price_history (
@@ -46,9 +42,9 @@ CREATE TABLE IF NOT EXISTS sale_price_history (
     presentation_id INT,
     sale_price DECIMAL(10,2) NOT NULL,
     effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (presentation_id) REFERENCES presentations(id)
+    FOREIGN KEY (presentation_id) REFERENCES presentations(id),
+    INDEX idx_sale_price_history_presentation_date (presentation_id, effective_date DESC)
 );
-CREATE INDEX IF NOT EXISTS idx_sale_price_history_presentation_date ON sale_price_history(presentation_id, effective_date DESC);
 
 -- 6. LOTES DE PRODUCCIÓN
 CREATE TABLE IF NOT EXISTS production_batches (
@@ -57,10 +53,10 @@ CREATE TABLE IF NOT EXISTS production_batches (
     quantity_produced INT NOT NULL,
     honey_used_kg DECIMAL(10,2) NOT NULL,
     production_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (presentation_id) REFERENCES presentations(id)
+    FOREIGN KEY (presentation_id) REFERENCES presentations(id),
+    INDEX idx_production_batches_date (production_date DESC),
+    INDEX idx_production_batches_presentation (presentation_id, production_date DESC)
 );
-CREATE INDEX IF NOT EXISTS idx_production_batches_date ON production_batches(production_date DESC);
-CREATE INDEX IF NOT EXISTS idx_production_batches_presentation ON production_batches(presentation_id, production_date DESC);
 
 -- 7. MOVIMIENTOS DE STOCK
 CREATE TABLE IF NOT EXISTS stock_movements (
@@ -72,10 +68,10 @@ CREATE TABLE IF NOT EXISTS stock_movements (
     reference_type VARCHAR(50) NOT NULL,
     reference_id INT,
     movement_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (presentation_id) REFERENCES presentations(id)
+    FOREIGN KEY (presentation_id) REFERENCES presentations(id),
+    INDEX idx_stock_movements_type_date (item_type, movement_date DESC),
+    INDEX idx_stock_movements_presentation_date (presentation_id, movement_date DESC)
 );
-CREATE INDEX IF NOT EXISTS idx_stock_movements_type_date ON stock_movements(item_type, movement_date DESC);
-CREATE INDEX IF NOT EXISTS idx_stock_movements_presentation_date ON stock_movements(presentation_id, movement_date DESC);
 
 -- 8. USUARIOS
 CREATE TABLE IF NOT EXISTS users (
@@ -134,16 +130,16 @@ CREATE TABLE IF NOT EXISTS recipe_items (
 -- A) ENVASES VACÍOS (CONTAINER)
 INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Envase 5 kg',          'CONTAINER', 'PIECE', 120,   0.00, 0, true),
-('Caja 30 gr (pza)',     'CONTAINER', 'PIECE', 3888,  0.00, 0, true), -- 81 cajas (3,888 pza)
+('Caja 30 gr (pza)',     'CONTAINER', 'PIECE', 3888,  0.00, 0, true),
 ('Envase 950 gr',        'CONTAINER', 'PIECE', 680,   0.00, 0, true),
-('Caja 330 gr (pza)',    'CONTAINER', 'PIECE', 276,   0.00, 0, true); -- 23 cajas (276 pza)
+('Caja 330 gr (pza)',    'CONTAINER', 'PIECE', 276,   0.00, 0, true);
 
 -- B) MIEL Y SUS DERIVADOS (BULK_HONEY)
 INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Panal',                    'BULK_HONEY', 'PIECE',  0,    0.00, 0, true),
 ('Polen',                    'BULK_HONEY', 'PIECE',  4,    0.00, 0, true),
 ('Cubeta Miel Pura',         'BULK_HONEY', 'PIECE',  32,   0.00, 0, true),
-('Galon Agave',              'BULK_HONEY', 'PIECE',  68.5, 0.00, 0, true), -- 68 y 1/2
+('Galon Agave',              'BULK_HONEY', 'PIECE',  68.5, 0.00, 0, true),
 ('Cubeta Miel con Limon',    'BULK_HONEY', 'PIECE',  4,    0.00, 0, true),
 ('Cubeta Miel con Gengibre', 'BULK_HONEY', 'PIECE',  2,    0.00, 0, true),
 ('Cubeta Miel Exportacion',  'BULK_HONEY', 'PIECE',  24,   0.00, 0, true),

@@ -91,8 +91,6 @@ public class ReportService {
 
     public ByteArrayInputStream exportInventoryToExcel() throws IOException {
         List<com.miel.backend.model.InventoryItem> rawItems = inventoryItemRepository.findAll();
-        List<com.miel.backend.model.RealTimeInventoryDTO> inventoryList = inventoryService.getRealTimeInventory();
-        Map<String, Object> summary = getSummaryReport();
 
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             // ── HOJA 1: Inventario de Almacén (Materia Prima, Envases, Quesos, Extras) ──
@@ -177,50 +175,56 @@ public class ReportService {
                 sheetAlmacen.autoSizeColumn(c);
             }
 
-            // ── HOJA 2: Presentaciones Envasadas ─────────────────────────
-            Sheet sheet = workbook.createSheet("Presentaciones Envasadas");
-            int rowIdx = 0;
-
-            Row headerRow = sheet.createRow(rowIdx++);
-            String[] columns = {"ID Presentación", "Nombre", "Peso (g)", "Stock Mínimo", "Stock Actual", "Costo Unitario ($)", "Precio Venta ($)", "Valor Total ($)", "Alerta Stock"};
-
+            // ── HOJA 2: Resumen por Categoría (datos reales de inventory_items) ──
+            Sheet sheet = workbook.createSheet("Resumen por Categoría");
+            String[] columns = {"Categoría", "Productos", "Piezas en Stock", "Valor Total ($)", "Sin Stock", "Bajo Stock"};
+            Row headerRow = sheet.createRow(0);
             for (int col = 0; col < columns.length; col++) {
                 Cell cell = headerRow.createCell(col);
                 cell.setCellValue(columns[col]);
                 cell.setCellStyle(hStyleAlm);
             }
 
-            if (inventoryList.isEmpty()) {
-                Row emptyRow = sheet.createRow(rowIdx++);
-                emptyRow.createCell(0).setCellValue("Sin presentaciones activas con precio de venta registrado.");
-            } else {
-                for (com.miel.backend.model.RealTimeInventoryDTO row : inventoryList) {
-                    Row excelRow = sheet.createRow(rowIdx++);
-                    excelRow.createCell(0).setCellValue(row.getPresentation_id());
-                    excelRow.createCell(1).setCellValue(row.getPresentation_name());
-                    excelRow.createCell(2).setCellValue(row.getWeight_grams().doubleValue());
-                    excelRow.createCell(3).setCellValue(row.getMin_stock());
-                    excelRow.createCell(4).setCellValue(row.getStock_actual());
-                    excelRow.createCell(5).setCellValue(row.getCosto_unitario().doubleValue());
-                    excelRow.createCell(6).setCellValue(row.getPrecio_venta_vigente().doubleValue());
-                    excelRow.createCell(7).setCellValue(row.getValor_total_stock().doubleValue());
-                    excelRow.createCell(8).setCellValue(row.getLow_stock_alert() ? "Sí" : "No");
-                }
+            Map<String, double[]> byCat = new java.util.LinkedHashMap<>();
+            for (com.miel.backend.model.InventoryItem item : sortedItems) {
+                double stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
+                double cost = item.getCostPerUnit() != null ? item.getCostPerUnit().doubleValue() : 0.0;
+                double minStk = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
+                double[] acc = byCat.computeIfAbsent(formatCategory(item.getCategory()), k -> new double[5]);
+                acc[0] += 1;
+                acc[1] += stock;
+                acc[2] += stock * cost;
+                if (stock <= 0) acc[3] += 1;
+                if (minStk > 0 && stock > 0 && stock <= minStk) acc[4] += 1;
             }
 
+            int rowIdx = 1;
+            double[] tot = new double[5];
+            for (Map.Entry<String, double[]> e : byCat.entrySet()) {
+                Row r = sheet.createRow(rowIdx++);
+                double[] a = e.getValue();
+                r.createCell(0).setCellValue(e.getKey());
+                for (int i = 0; i < 5; i++) {
+                    r.createCell(i + 1).setCellValue(a[i]);
+                    tot[i] += a[i];
+                }
+            }
+            Row totRow2 = sheet.createRow(rowIdx);
+            Cell tl = totRow2.createCell(0);
+            tl.setCellValue("TOTAL");
+            tl.setCellStyle(totStyle);
+            for (int i = 0; i < 5; i++) {
+                Cell c = totRow2.createCell(i + 1);
+                c.setCellValue(tot[i]);
+                c.setCellStyle(totStyle);
+            }
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }
 
-            // ── HOJA 3: Análisis de Envases ──────────────────────────
-            List<Map<String, Object>> analysis = getContainerAnalysis();
-            Sheet sheet2 = workbook.createSheet("Análisis de Envases");
-
-            String[] cols2 = {
-                "Presentación", "Peso (g)", "Envases Llenos", "Envases Vacíos",
-                "Miel Usada (kg)", "Miel Disponible (kg)",
-                "Cubetas Disponibles", "Envases Más que se Pueden Llenar"
-            };
+            // ── HOJA 3: Envases y Alertas ──────────────────────────
+            Sheet sheet2 = workbook.createSheet("Envases y Alertas");
+            String[] cols2 = {"Producto", "Categoría", "Stock Actual", "Stock Mínimo", "Estado"};
             Row hRow2 = sheet2.createRow(0);
             for (int c = 0; c < cols2.length; c++) {
                 Cell cell = hRow2.createCell(c);
@@ -229,20 +233,23 @@ public class ReportService {
             }
 
             int r2 = 1;
-            for (Map<String, Object> row : analysis) {
-                Row exRow = sheet2.createRow(r2++);
-                double mielDisponible = row.get("miel_disponible_kg") != null
-                    ? ((Number) row.get("miel_disponible_kg")).doubleValue() : 0.0;
-                double cubetas = mielDisponible / KG_POR_CUBETA;
+            // Primero todos los envases, luego cualquier otro producto agotado o bajo stock
+            for (com.miel.backend.model.InventoryItem item : sortedItems) {
+                double stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
+                double minStk = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
+                boolean isContainer = "CONTAINER".equals(item.getCategory());
+                String estado = stock <= 0 ? "AGOTADO" : (minStk > 0 && stock <= minStk ? "BAJO STOCK" : "OK");
+                if (!isContainer && "OK".equals(estado)) continue;
 
-                exRow.createCell(0).setCellValue(String.valueOf(row.get("nombre")));
-                exRow.createCell(1).setCellValue(((Number) row.get("peso_gramos")).doubleValue());
-                exRow.createCell(2).setCellValue(((Number) row.get("envases_llenos")).longValue());
-                exRow.createCell(3).setCellValue(((Number) row.get("envases_vacios")).longValue());
-                exRow.createCell(4).setCellValue(((Number) row.get("miel_usada_kg")).doubleValue());
-                exRow.createCell(5).setCellValue(mielDisponible);
-                exRow.createCell(6).setCellValue(Math.round(cubetas * 100.0) / 100.0);
-                exRow.createCell(7).setCellValue(((Number) row.get("envases_posibles")).longValue());
+                Row exRow = sheet2.createRow(r2++);
+                exRow.createCell(0).setCellValue(item.getName());
+                exRow.createCell(1).setCellValue(formatCategory(item.getCategory()));
+                exRow.createCell(2).setCellValue(stock);
+                exRow.createCell(3).setCellValue(minStk);
+                exRow.createCell(4).setCellValue(estado);
+            }
+            if (r2 == 1) {
+                sheet2.createRow(1).createCell(0).setCellValue("Sin envases ni alertas registradas.");
             }
             for (int c = 0; c < cols2.length; c++) {
                 sheet2.autoSizeColumn(c);

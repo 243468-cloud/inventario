@@ -102,8 +102,14 @@ CREATE TABLE IF NOT EXISTS inventory_items (
     current_stock DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     cost_per_unit DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     min_stock DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    is_active BOOLEAN NOT NULL DEFAULT true
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    UNIQUE KEY uq_inventory_items_name (name)
 );
+
+-- Limpieza de duplicados si ya existen (ejecuta antes de los INSERTs)
+DELETE t1 FROM inventory_items t1
+    INNER JOIN inventory_items t2
+    WHERE t1.id > t2.id AND t1.name = t2.name;
 
 -- 11. ENTRADAS DE ALMACÉN
 CREATE TABLE IF NOT EXISTS purchase_entries (
@@ -128,14 +134,14 @@ CREATE TABLE IF NOT EXISTS recipe_items (
 -- ==============================================================================
 
 -- A) ENVASES VACÍOS (CONTAINER)
-INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+INSERT IGNORE INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Envase 5 kg',          'CONTAINER', 'PIECE', 120,   0.00, 0, true),
 ('Caja 30 gr (pza)',     'CONTAINER', 'PIECE', 3888,  0.00, 0, true),
 ('Envase 950 gr',        'CONTAINER', 'PIECE', 680,   0.00, 0, true),
 ('Caja 330 gr (pza)',    'CONTAINER', 'PIECE', 276,   0.00, 0, true);
 
 -- B) MIEL Y SUS DERIVADOS (BULK_HONEY)
-INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+INSERT IGNORE INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Panal',                    'BULK_HONEY', 'PIECE',  0,    0.00, 0, true),
 ('Polen',                    'BULK_HONEY', 'PIECE',  4,    0.00, 0, true),
 ('Cubeta Miel Pura',         'BULK_HONEY', 'PIECE',  32,   0.00, 0, true),
@@ -146,14 +152,14 @@ INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit,
 ('Cubeta Miel con Polen',    'BULK_HONEY', 'PIECE',  3,    0.00, 0, true);
 
 -- C) QUESOS (CHEESE)
-INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+INSERT IGNORE INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Queso Ocosingo',          'CHEESE', 'PIECE', 10, 0.00, 0, true),
 ('Queso Excelsior',         'CHEESE', 'PIECE',  1, 0.00, 0, true),
 ('Queso de Origen Vegetal', 'CHEESE', 'PIECE',  2, 0.00, 0, true),
 ('Queso Mantequilla',       'CHEESE', 'PIECE',  9, 0.00, 0, true);
 
 -- D) EXTRAS (OTHER)
-INSERT INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
+INSERT IGNORE INTO inventory_items (name, category, unit, current_stock, cost_per_unit, min_stock, is_active) VALUES
 ('Vinagre',    'OTHER', 'PIECE', 2,  0.00, 0, true),
 ('Granola',    'OTHER', 'PIECE', 0,  0.00, 0, true),
 ('San Marino', 'OTHER', 'PIECE', 11, 0.00, 0, true);

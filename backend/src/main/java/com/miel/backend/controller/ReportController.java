@@ -26,6 +26,7 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getSummaryReport());
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping("/export/inventory")
     public ResponseEntity<InputStreamResource> exportInventory() throws IOException {
         ByteArrayInputStream in = reportService.exportInventoryToExcel();
@@ -40,6 +41,7 @@ public class ReportController {
                 .body(new InputStreamResource(in));
     }
 
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     @GetMapping("/export/pdf")
     public ResponseEntity<InputStreamResource> exportInventoryPdf() throws IOException {
         ByteArrayInputStream in = reportService.exportInventoryToPdf();

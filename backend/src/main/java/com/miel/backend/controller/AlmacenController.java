@@ -27,7 +27,21 @@ public class AlmacenController {
 
     @PostMapping("/items")
     public ResponseEntity<InventoryItem> createInventoryItem(@RequestBody InventoryItem item) {
-        return ResponseEntity.ok(inventoryItemRepository.save(item));
+        return inventoryItemRepository.findByName(item.getName())
+            .map(existing -> {
+                if (item.getCurrentStock() != null && item.getCurrentStock().compareTo(BigDecimal.ZERO) > 0) {
+                    existing.setCurrentStock(existing.getCurrentStock().add(item.getCurrentStock()));
+                }
+                if (item.getCostPerUnit() != null && item.getCostPerUnit().compareTo(BigDecimal.ZERO) > 0) {
+                    existing.setCostPerUnit(item.getCostPerUnit());
+                }
+                if (item.getMinStock() != null) {
+                    existing.setMinStock(item.getMinStock());
+                }
+                existing.setIsActive(true);
+                return ResponseEntity.ok(inventoryItemRepository.save(existing));
+            })
+            .orElseGet(() -> ResponseEntity.ok(inventoryItemRepository.save(item)));
     }
 
     @PutMapping("/items/{id}")

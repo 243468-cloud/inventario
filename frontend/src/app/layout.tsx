@@ -44,13 +44,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=2" />
         <link rel="shortcut icon" href="/apple-touch-icon.png?v=2" />
       </head>
-      <body className={`${outfit.variable} font-sans bg-gradient-to-br from-[#fffdf5] via-[#f1f6f3] to-[#e8f0eb] min-h-screen text-[#2c4c3b] selection:bg-[#e07a5f] selection:text-white`}>
-        {/* Decorative background shapes */}
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#e07a5f] rounded-full mix-blend-multiply filter blur-[100px] opacity-10 animate-blob" />
-          <div className="absolute top-1/3 -left-24 w-96 h-96 bg-[#2c4c3b] rounded-full mix-blend-multiply filter blur-[100px] opacity-10 animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-24 left-1/3 w-96 h-96 bg-[#d4a373] rounded-full mix-blend-multiply filter blur-[100px] opacity-10 animate-blob animation-delay-4000" />
-        </div>
+      <body className={`${outfit.variable} font-sans bg-[#fafaf9] min-h-screen text-stone-900 selection:bg-stone-800 selection:text-white`}>
 
         {token && <NavBar role={role} />}
         {token && <PushNotificationSetup />}

@@ -25,28 +25,28 @@ export default function NavBar({ role }: NavBarProps) {
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
-    <nav className="fixed w-full z-50 top-0 bg-white/70 backdrop-blur-lg border-b border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.05)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+    <nav className="fixed w-full z-50 top-0 bg-white/80 backdrop-blur-md border-b border-stone-200/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 group" onClick={() => setOpen(false)}>
-          <div className="p-2 bg-gradient-to-tr from-[#2c4c3b] to-[#3a634d] rounded-xl shadow-lg transform group-hover:rotate-12 transition-transform duration-300 text-[#fffdf5]">
-            <HexagonIcon />
+        <Link href="/" className="flex items-center space-x-2.5" onClick={() => setOpen(false)}>
+          <div className="w-8 h-8 rounded-lg bg-stone-900 flex items-center justify-center text-white">
+            <HexagonIcon className="w-4 h-4" />
           </div>
-          <span className="text-xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-[#2c4c3b] to-[#e07a5f]">
+          <span className="text-base font-bold tracking-tight text-stone-900">
             Selva Maya
           </span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex space-x-2 items-center font-medium">
+        <div className="hidden md:flex space-x-1 items-center">
           {links.map(({ href, label, icon }) => (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm transition-all duration-200
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                 ${isActive(href)
-                  ? 'bg-[#2c4c3b] text-white shadow-md'
-                  : 'text-[#2c4c3b]/80 hover:bg-[#2c4c3b]/10 hover:text-[#2c4c3b]'
+                  ? 'bg-stone-100 text-stone-900 font-semibold'
+                  : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
                 }`}
             >
               {icon}

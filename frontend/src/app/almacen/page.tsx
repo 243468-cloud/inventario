@@ -16,9 +16,11 @@ interface InventoryItem {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  CONTAINER: 'Envases Vacíos',
-  BULK_HONEY: 'Miel a Granel',
+  CONTAINER:  'Envases Vacíos',
+  BULK_HONEY: 'Miel y Derivados',
   DEHYDRATED: 'Deshidratados',
+  CHEESE:     'Quesos',
+  OTHER:      'Extras',
 };
 
 const UNIT_LABELS: Record<string, string> = {
@@ -236,7 +238,7 @@ export default function Almacen() {
 
           {/* Right Col: Inventory by Category */}
           <div className="md:col-span-2 space-y-6">
-            {(['BULK_HONEY', 'DEHYDRATED', 'CONTAINER'] as const).map(category => (
+            {(['BULK_HONEY', 'CONTAINER', 'DEHYDRATED', 'CHEESE', 'OTHER'] as const).map(category => (
               <div key={category} className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-sm border border-white/40 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100/60 flex items-center justify-between bg-white/40">
                   <h3 className="text-lg font-extrabold text-[#1f3d2e]">{CATEGORY_LABELS[category]}</h3>
@@ -324,8 +326,10 @@ export default function Almacen() {
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b]/30 font-medium"
                     >
                       <option value="CONTAINER">Envases Vacíos</option>
-                      <option value="BULK_HONEY">Miel a Granel</option>
+                      <option value="BULK_HONEY">Miel y Derivados</option>
                       <option value="DEHYDRATED">Deshidratados</option>
+                      <option value="CHEESE">Quesos</option>
+                      <option value="OTHER">Extras</option>
                     </select>
                   </div>
                   <div>

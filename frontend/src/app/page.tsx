@@ -8,6 +8,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export const dynamic = 'force-dynamic';
 
+const CheeseIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12l9-9 9 9v9H3z"/><circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+);
+
+const StarIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </svg>
+);
+
 async function getInventory(): Promise<InventoryItem[]> {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
@@ -141,15 +153,10 @@ export default async function Dashboard() {
         )}
 
         <div className="px-8 py-5 border-y border-gray-100/60 bg-white/40">
-          <h3 className="text-lg font-extrabold text-[#1f3d2e]">Materia Prima: Mieles (Cubetas y Galones)</h3>
+          <h3 className="text-lg font-extrabold text-[#1f3d2e]">Miel y Derivados</h3>
         </div>
         <div className="divide-y divide-gray-100/60 max-h-[250px] overflow-y-auto">
-             {rawItems.filter(i => i.category === 'BULK_HONEY').map(item => {
-                 const isAgave = item.name.toLowerCase().includes('agave');
-                 const divider = isAgave ? 25 : 27;
-                 const format = isAgave ? 'Galones' : 'Cubetas';
-                 const qty = Math.floor(item.currentStock / divider);
-                 return (
+             {rawItems.filter(i => i.category === 'BULK_HONEY').map(item => (
                     <div key={`raw-${item.id}`} className="flex items-center justify-between px-8 py-4 hover:bg-white/40 transition-colors">
                       <div className="flex items-center gap-4">
                          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 border border-amber-100">
@@ -157,17 +164,15 @@ export default async function Dashboard() {
                          </div>
                          <div>
                            <p className="font-bold text-[#1f3d2e] text-sm">{item.name}</p>
-                           <p className="text-xs text-gray-500">{item.currentStock} kg totales</p>
                          </div>
                       </div>
                       <div className="text-right">
                          <p className={`font-black text-lg ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-[#2c4c3b]'}`}>
-                           {qty} {format}
+                           {item.currentStock} pza
                          </p>
                       </div>
                     </div>
-                 );
-             })}
+             ))}
         </div>
 
         <div className="px-8 py-5 border-y border-gray-100/60 bg-white/40">
@@ -192,7 +197,62 @@ export default async function Dashboard() {
                 </div>
              ))}
         </div>
-      </div>
+
+        {/* Quesos */}
+        {rawItems.some(i => i.category === 'CHEESE') && (
+          <>
+            <div className="px-8 py-5 border-y border-gray-100/60 bg-white/40">
+              <h3 className="text-lg font-extrabold text-[#1f3d2e]">Quesos</h3>
+            </div>
+            <div className="divide-y divide-gray-100/60 max-h-[250px] overflow-y-auto">
+              {rawItems.filter(i => i.category === 'CHEESE').map(item => (
+                <div key={`cheese-${item.id}`} className="flex items-center justify-between px-8 py-4 hover:bg-white/40 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100">
+                      <CheeseIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#1f3d2e] text-sm">{item.name}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-black text-lg ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-[#2c4c3b]'}`}>
+                      {item.currentStock} pza
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Extras */}
+        {rawItems.some(i => i.category === 'OTHER') && (
+          <>
+            <div className="px-8 py-5 border-y border-gray-100/60 bg-white/40">
+              <h3 className="text-lg font-extrabold text-[#1f3d2e]">Extras</h3>
+            </div>
+            <div className="divide-y divide-gray-100/60 max-h-[250px] overflow-y-auto">
+              {rawItems.filter(i => i.category === 'OTHER').map(item => (
+                <div key={`other-${item.id}`} className="flex items-center justify-between px-8 py-4 hover:bg-white/40 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500 border border-purple-100">
+                      <StarIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-[#1f3d2e] text-sm">{item.name}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-black text-lg ${item.currentStock <= item.minStock ? 'text-red-600' : 'text-[#2c4c3b]'}`}>
+                      {item.currentStock} pza
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
     </div>
   )

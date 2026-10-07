@@ -103,8 +103,8 @@ public class AuthController {
                     .body(Map.of("message", "No se pudo completar el registro. Intenta con otro nombre."));
         }
 
-        String assignedRole = (req.getRole() != null && !req.getRole().isBlank())
-                ? req.getRole().toLowerCase() : "authenticated";
+        // Registro público: siempre empleado. Solo SUPER_ADMIN cambia roles desde /usuarios.
+        String assignedRole = "USER";
 
         User user = new User();
         user.setUsername(req.getUsername().trim());

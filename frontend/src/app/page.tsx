@@ -148,14 +148,31 @@ export default async function Dashboard() {
               <h3 className="text-xs font-bold text-stone-600 uppercase tracking-wider">Miel y Derivados</h3>
             </div>
             <div className="divide-y divide-stone-100 max-h-[250px] overflow-y-auto">
-              {rawItems.filter(i => i.category === 'BULK_HONEY').map(item => (
-                <div key={`raw-${item.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-stone-50/50 transition-colors">
-                  <p className="font-semibold text-stone-900 text-sm">{item.name}</p>
-                  <p className={`font-bold text-sm ${item.currentStock <= item.minStock && item.isActive ? 'text-amber-600' : 'text-stone-900'}`}>
-                    {item.currentStock} {item.unit === 'KG' ? 'kg' : 'pza'}
-                  </p>
-                </div>
-              ))}
+              {rawItems.filter(i => i.category === 'BULK_HONEY').map(item => {
+                const isAgave = item.name.toLowerCase().includes('agave');
+                const isGalon = item.name.toLowerCase().includes('galon') || isAgave;
+                const isCubeta = item.name.toLowerCase().includes('cubeta');
+                
+                let format = item.unit === 'KG' ? 'kg' : 'pza';
+                if (isGalon) format = 'Galones';
+                if (isCubeta) format = 'Cubetas';
+
+                let kgTotales = 0;
+                if (isGalon) kgTotales = item.currentStock * 25;
+                else if (isCubeta) kgTotales = item.currentStock * 24.5;
+
+                return (
+                  <div key={`raw-${item.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-stone-50/50 transition-colors">
+                    <div>
+                      <p className="font-semibold text-stone-900 text-sm">{item.name}</p>
+                      {kgTotales > 0 && <p className="text-xs text-stone-400">{kgTotales.toFixed(2)} kg totales</p>}
+                    </div>
+                    <p className={`font-bold text-sm ${item.currentStock <= item.minStock && item.isActive ? 'text-amber-600' : 'text-stone-900'}`}>
+                      {item.currentStock} {format}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

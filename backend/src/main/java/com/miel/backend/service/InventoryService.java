@@ -30,8 +30,8 @@ public class InventoryService {
                 p.weight_grams,
                 p.min_stock,
                 COALESCE(ps.current_stock, 0) AS stock_actual,
-                (COALESCE(chc.cost_per_kg, 0) / 1000.0) AS costo_por_gramo,
-                (COALESCE(chc.cost_per_kg, 0) * (p.weight_grams / 1000.0)) AS costo_unitario,
+                (COALESCE((SELECT cost_per_kg FROM raw_material_cost_history ORDER BY effective_date DESC LIMIT 1), 0) / 1000.0) AS costo_por_gramo,
+                (COALESCE((SELECT cost_per_kg FROM raw_material_cost_history ORDER BY effective_date DESC LIMIT 1), 0) * (p.weight_grams / 1000.0)) AS costo_unitario,
                 COALESCE(cp.sale_price, 0) AS precio_venta_vigente,
                 (COALESCE(ps.current_stock, 0) * COALESCE(cp.sale_price, 0)) AS valor_total_stock,
                 CASE 
@@ -49,12 +49,6 @@ public class InventoryService {
                     GROUP BY presentation_id
                 ) max_sph ON sph.presentation_id = max_sph.presentation_id AND sph.effective_date = max_sph.max_date
             ) cp ON p.id = cp.presentation_id
-            CROSS JOIN (
-                SELECT * FROM (
-                    SELECT cost_per_kg FROM raw_material_cost_history ORDER BY effective_date DESC LIMIT 1
-                ) sub1
-                UNION ALL SELECT 0 LIMIT 1
-            ) chc
             WHERE p.is_active = true
         """;
         

@@ -255,6 +255,48 @@ public class ReportService {
                 sheet2.autoSizeColumn(c);
             }
 
+            // ── HOJA 4: Movimientos (Entradas y Salidas) ──────────────────────────
+            Sheet sheetMov = workbook.createSheet("Movimientos");
+            String[] colsMov = {"Tipo", "Fecha", "Producto", "Categoría", "Formato", "Cantidad Formato", "Cantidad Total (Base)", "Motivo", "Notas"};
+            Row hRowMov = sheetMov.createRow(0);
+            for (int c = 0; c < colsMov.length; c++) {
+                Cell cell = hRowMov.createCell(c);
+                cell.setCellValue(colsMov[c]);
+                cell.setCellStyle(hStyleAlm);
+            }
+
+            String sqlMov = "SELECT 'ENTRADA' as tipo, pe.entry_date as fecha, ii.name as producto, ii.category as categoria, pe.format_type as formato, pe.format_quantity as cantidad_formato, pe.total_base_quantity as cantidad_total, '-' as motivo, '-' as notas " +
+                            "FROM purchase_entries pe " +
+                            "JOIN inventory_items ii ON pe.inventory_item_id = ii.id " +
+                            "UNION ALL " +
+                            "SELECT 'SALIDA' as tipo, ex.exit_date as fecha, ii.name as producto, ii.category as categoria, ex.format_type as formato, ex.format_quantity as cantidad_formato, ex.total_base_quantity as cantidad_total, ex.reason as motivo, ex.notes as notas " +
+                            "FROM inventory_exits ex " +
+                            "JOIN inventory_items ii ON ex.inventory_item_id = ii.id " +
+                            "ORDER BY fecha DESC";
+            
+            List<Map<String, Object>> movimientos = jdbcTemplate.queryForList(sqlMov);
+            
+            int rMov = 1;
+            for (Map<String, Object> mov : movimientos) {
+                Row row = sheetMov.createRow(rMov++);
+                row.createCell(0).setCellValue(mov.get("tipo") != null ? mov.get("tipo").toString() : "");
+                Object fecha = mov.get("fecha");
+                row.createCell(1).setCellValue(fecha != null ? fecha.toString() : "");
+                row.createCell(2).setCellValue(mov.get("producto") != null ? mov.get("producto").toString() : "");
+                row.createCell(3).setCellValue(formatCategory(mov.get("categoria") != null ? mov.get("categoria").toString() : ""));
+                row.createCell(4).setCellValue(mov.get("formato") != null ? mov.get("formato").toString() : "");
+                Object qtyF = mov.get("cantidad_formato");
+                row.createCell(5).setCellValue(qtyF != null ? ((java.math.BigDecimal) qtyF).doubleValue() : 0.0);
+                Object qtyT = mov.get("cantidad_total");
+                row.createCell(6).setCellValue(qtyT != null ? ((java.math.BigDecimal) qtyT).doubleValue() : 0.0);
+                row.createCell(7).setCellValue(mov.get("motivo") != null ? mov.get("motivo").toString() : "");
+                row.createCell(8).setCellValue(mov.get("notas") != null ? mov.get("notas").toString() : "");
+            }
+
+            for (int c = 0; c < colsMov.length; c++) {
+                sheetMov.autoSizeColumn(c);
+            }
+
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
         }
@@ -334,6 +376,52 @@ public class ReportService {
                 }
                 document.add(tablePres);
             }
+
+            // Tabla Movimientos
+            Paragraph p3 = new Paragraph("Movimientos Recientes (Entradas y Salidas)", sectionFont);
+            p3.setSpacingBefore(10);
+            p3.setSpacingAfter(8);
+            document.add(p3);
+
+            PdfPTable tableMov = new PdfPTable(7);
+            tableMov.setWidthPercentage(100);
+            float[] wMov = {1.5f, 2f, 3f, 1.5f, 1.5f, 2f, 2f};
+            try { tableMov.setWidths(wMov); } catch (Exception e) {}
+
+            String[] movHeaders = {"Tipo", "Fecha", "Producto", "Formato", "Cant.", "Motivo", "Notas"};
+            for (String h : movHeaders) {
+                PdfPCell c = new PdfPCell(new Phrase(h, hFont));
+                c.setBackgroundColor(new java.awt.Color(245, 230, 220));
+                tableMov.addCell(c);
+            }
+
+            String sqlMov = "SELECT 'ENTRADA' as tipo, pe.entry_date as fecha, ii.name as producto, ii.category as categoria, pe.format_type as formato, pe.format_quantity as cantidad_formato, pe.total_base_quantity as cantidad_total, '-' as motivo, '-' as notas " +
+                            "FROM purchase_entries pe " +
+                            "JOIN inventory_items ii ON pe.inventory_item_id = ii.id " +
+                            "UNION ALL " +
+                            "SELECT 'SALIDA' as tipo, ex.exit_date as fecha, ii.name as producto, ii.category as categoria, ex.format_type as formato, ex.format_quantity as cantidad_formato, ex.total_base_quantity as cantidad_total, ex.reason as motivo, ex.notes as notas " +
+                            "FROM inventory_exits ex " +
+                            "JOIN inventory_items ii ON ex.inventory_item_id = ii.id " +
+                            "ORDER BY fecha DESC LIMIT 50";
+            
+            List<Map<String, Object>> movimientos = jdbcTemplate.queryForList(sqlMov);
+
+            for (Map<String, Object> mov : movimientos) {
+                tableMov.addCell(new Phrase(mov.get("tipo") != null ? mov.get("tipo").toString() : "", rFont));
+                Object fecha = mov.get("fecha");
+                String fechaStr = fecha != null ? fecha.toString() : "";
+                if (fechaStr.length() > 16) fechaStr = fechaStr.substring(0, 16); // format to yyyy-MM-dd HH:mm
+                tableMov.addCell(new Phrase(fechaStr, rFont));
+                tableMov.addCell(new Phrase(mov.get("producto") != null ? mov.get("producto").toString() : "", rFont));
+                tableMov.addCell(new Phrase(mov.get("formato") != null ? mov.get("formato").toString() : "", rFont));
+                Object qty = mov.get("cantidad_formato");
+                tableMov.addCell(new Phrase(qty != null ? qty.toString() : "", rFont));
+                Object motivo = mov.get("motivo");
+                tableMov.addCell(new Phrase(motivo != null ? motivo.toString() : "", rFont));
+                Object notas = mov.get("notas");
+                tableMov.addCell(new Phrase(notas != null ? notas.toString() : "", rFont));
+            }
+            document.add(tableMov);
 
             document.close();
             return new ByteArrayInputStream(out.toByteArray());

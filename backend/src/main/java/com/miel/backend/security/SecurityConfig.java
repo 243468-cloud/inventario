@@ -37,7 +37,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12); // strength 12 (default es 10)
+        return new BCryptPasswordEncoder(10); // default es 10
     }
 
     @Bean

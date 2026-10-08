@@ -302,16 +302,32 @@ public class ReportService {
             int rMov = 1;
             for (Map<String, Object> mov : movimientos) {
                 Row row = sheetMov.createRow(rMov++);
+                String producto = mov.get("producto") != null ? mov.get("producto").toString() : "";
+                String formato = mov.get("formato") != null ? mov.get("formato").toString() : "";
+                Object qtyFObj = mov.get("cantidad_formato");
+                double qtyF = qtyFObj != null ? ((java.math.BigDecimal) qtyFObj).doubleValue() : 0.0;
+                Object qtyTObj = mov.get("cantidad_total");
+                double qtyT = qtyTObj != null ? ((java.math.BigDecimal) qtyTObj).doubleValue() : 0.0;
+                
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)(caja|paq) c/(\\d+)\\s*pza");
+                java.util.regex.Matcher matcher = pattern.matcher(producto);
+                if (matcher.find()) {
+                    formato = matcher.group(1).toLowerCase().startsWith("caja") ? "Cajas" : "Paquetes";
+                    double pieces = Double.parseDouble(matcher.group(2));
+                    if (pieces > 0) {
+                        qtyF = qtyF / pieces;
+                        qtyT = qtyT / pieces;
+                    }
+                }
+                
                 row.createCell(0).setCellValue(mov.get("tipo") != null ? mov.get("tipo").toString() : "");
                 Object fecha = mov.get("fecha");
                 row.createCell(1).setCellValue(fecha != null ? fecha.toString() : "");
-                row.createCell(2).setCellValue(mov.get("producto") != null ? mov.get("producto").toString() : "");
+                row.createCell(2).setCellValue(producto);
                 row.createCell(3).setCellValue(formatCategory(mov.get("categoria") != null ? mov.get("categoria").toString() : ""));
-                row.createCell(4).setCellValue(mov.get("formato") != null ? mov.get("formato").toString() : "");
-                Object qtyF = mov.get("cantidad_formato");
-                row.createCell(5).setCellValue(qtyF != null ? ((java.math.BigDecimal) qtyF).doubleValue() : 0.0);
-                Object qtyT = mov.get("cantidad_total");
-                row.createCell(6).setCellValue(qtyT != null ? ((java.math.BigDecimal) qtyT).doubleValue() : 0.0);
+                row.createCell(4).setCellValue(formato);
+                row.createCell(5).setCellValue(qtyF);
+                row.createCell(6).setCellValue(qtyT);
                 row.createCell(7).setCellValue(mov.get("motivo") != null ? mov.get("motivo").toString() : "");
                 row.createCell(8).setCellValue(mov.get("notas") != null ? mov.get("notas").toString() : "");
             }
@@ -431,15 +447,31 @@ public class ReportService {
             List<Map<String, Object>> movimientos = jdbcTemplate.queryForList(sqlMov);
 
             for (Map<String, Object> mov : movimientos) {
+                String producto = mov.get("producto") != null ? mov.get("producto").toString() : "";
+                String formato = mov.get("formato") != null ? mov.get("formato").toString() : "";
+                Object qtyObj = mov.get("cantidad_formato");
+                String qtyStr = qtyObj != null ? qtyObj.toString() : "";
+                
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)(caja|paq) c/(\\d+)\\s*pza");
+                java.util.regex.Matcher matcher = pattern.matcher(producto);
+                if (matcher.find() && qtyObj != null) {
+                    formato = matcher.group(1).toLowerCase().startsWith("caja") ? "Cajas" : "Paquetes";
+                    double pieces = Double.parseDouble(matcher.group(2));
+                    if (pieces > 0) {
+                        double qtyNum = ((java.math.BigDecimal) qtyObj).doubleValue();
+                        qtyStr = String.format("%.2f", qtyNum / pieces);
+                        if (qtyStr.endsWith(".00")) qtyStr = qtyStr.substring(0, qtyStr.length() - 3);
+                    }
+                }
+
                 tableMov.addCell(new Phrase(mov.get("tipo") != null ? mov.get("tipo").toString() : "", rFont));
                 Object fecha = mov.get("fecha");
                 String fechaStr = fecha != null ? fecha.toString() : "";
                 if (fechaStr.length() > 16) fechaStr = fechaStr.substring(0, 16); // format to yyyy-MM-dd HH:mm
                 tableMov.addCell(new Phrase(fechaStr, rFont));
-                tableMov.addCell(new Phrase(mov.get("producto") != null ? mov.get("producto").toString() : "", rFont));
-                tableMov.addCell(new Phrase(mov.get("formato") != null ? mov.get("formato").toString() : "", rFont));
-                Object qty = mov.get("cantidad_formato");
-                tableMov.addCell(new Phrase(qty != null ? qty.toString() : "", rFont));
+                tableMov.addCell(new Phrase(producto, rFont));
+                tableMov.addCell(new Phrase(formato, rFont));
+                tableMov.addCell(new Phrase(qtyStr, rFont));
                 Object motivo = mov.get("motivo");
                 tableMov.addCell(new Phrase(motivo != null ? motivo.toString() : "", rFont));
                 Object notas = mov.get("notas");

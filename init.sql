@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS bulk_honey_inventory (
     id INT AUTO_INCREMENT PRIMARY KEY,
     current_stock_kg DECIMAL(10,2) NOT NULL DEFAULT 0
 );
-INSERT IGNORE INTO bulk_honey_inventory (id, current_stock_kg) VALUES (1, 0);
+-- Inicializar con los 864 kg de miel a granel disponibles (32 cubetas de miel pura x 27 kg)
+INSERT INTO bulk_honey_inventory (id, current_stock_kg) VALUES (1, 864.00)
+ON DUPLICATE KEY UPDATE current_stock_kg = 864.00;
 
 -- 3. STOCK DE PRESENTACIONES
 CREATE TABLE IF NOT EXISTS presentation_stock (
@@ -214,5 +216,68 @@ INSERT INTO presentations (id, name, weight_grams, is_active, min_stock, contain
 INSERT IGNORE INTO presentation_stock (presentation_id, current_stock) VALUES
 (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
 (8, 0), (9, 0), (10, 0), (11, 0), (12, 0), (13, 0), (14, 0);
+
+-- ==============================================================================
+-- F) VINCULACIÓN DE RECETAS POR PRESENTACIÓN (RECIPE_ITEMS)
+-- Relaciona cada presentación con su envase y materia prima
+-- ==============================================================================
+DELETE FROM recipe_items WHERE id > 0;
+
+-- 1. Frasco 30 gr Miel normal
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 1, id, 1.00 FROM inventory_items WHERE name = 'Frasco 30 gr (Caja c/48 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 1, id, 0.030 FROM inventory_items WHERE name = 'Cubeta Miel Pura' LIMIT 1;
+
+-- 2. Frasco 30 gr Miel de melipona
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 2, id, 1.00 FROM inventory_items WHERE name = 'Frasco 30 gr (Caja c/48 pza)' LIMIT 1;
+
+-- 7. 330 gr Miel normal
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 7, id, 1.00 FROM inventory_items WHERE name = 'Frasco Hexagonal 330 gr (Caja c/12 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 7, id, 0.330 FROM inventory_items WHERE name = 'Cubeta Miel Pura' LIMIT 1;
+
+-- 8. 330 gr Miel con limón
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 8, id, 1.00 FROM inventory_items WHERE name = 'Frasco Hexagonal 330 gr (Caja c/12 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 8, id, 0.330 FROM inventory_items WHERE name = 'Cubeta Miel con Limon' LIMIT 1;
+
+-- 9. 330 gr Miel con jengibre
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 9, id, 1.00 FROM inventory_items WHERE name = 'Frasco Hexagonal 330 gr (Caja c/12 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 9, id, 0.330 FROM inventory_items WHERE name = 'Cubeta Miel con Gengibre' LIMIT 1;
+
+-- 10. 330 gr Miel con Limón/jengibre
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 10, id, 1.00 FROM inventory_items WHERE name = 'Frasco Hexagonal 330 gr (Caja c/12 pza)' LIMIT 1;
+
+-- 11. 500 gr Miel normal
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 11, id, 1.00 FROM inventory_items WHERE name = 'Botella Cristal 500 gr (Caja c/12 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 11, id, 0.500 FROM inventory_items WHERE name = 'Cubeta Miel Pura' LIMIT 1;
+
+-- 12. 950 gr Miel normal
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 12, id, 1.00 FROM inventory_items WHERE name = 'Botella Licorera 950 gr (Paq c/136 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 12, id, 0.950 FROM inventory_items WHERE name = 'Cubeta Miel Pura' LIMIT 1;
+
+-- 13. 950 gr Miel Agave
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 13, id, 1.00 FROM inventory_items WHERE name = 'Botella Licorera 950 gr (Paq c/136 pza)' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 13, id, 0.950 FROM inventory_items WHERE name = 'Galon Agave' LIMIT 1;
+
+-- 14. 5 kg Miel normal
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 14, id, 1.00 FROM inventory_items WHERE name = 'Mini Galón 5 kg' LIMIT 1;
+INSERT INTO recipe_items (presentation_id, inventory_item_id, quantity_required)
+SELECT 14, id, 5.000 FROM inventory_items WHERE name = 'Cubeta Miel Pura' LIMIT 1;
+
 
 

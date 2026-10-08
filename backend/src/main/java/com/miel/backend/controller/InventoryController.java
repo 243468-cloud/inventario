@@ -67,6 +67,11 @@ public class InventoryController {
         return ResponseEntity.ok().build();
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    }
+
     @Data
     public static class ProductionBatchRequest {
         @NotNull(message = "La presentación es obligatoria")

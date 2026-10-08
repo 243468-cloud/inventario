@@ -55,8 +55,9 @@ export default function Produccion() {
         setQuantity('');
         setTimeout(() => setMessage(''), 4000);
       } else {
+        const errData = await res.json().catch(() => null);
         setIsError(true);
-        setMessage('No se pudo registrar el lote. Verifica los datos.');
+        setMessage(errData?.message || 'No se pudo registrar el lote. Verifica que haya suficiente miel a granel.');
       }
     } catch {
       setIsError(true);

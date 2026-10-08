@@ -72,6 +72,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/push/vapid-public-key").permitAll()
+                .requestMatchers("/api/ping").permitAll()
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
             )

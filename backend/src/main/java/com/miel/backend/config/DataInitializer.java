@@ -104,6 +104,8 @@ public class DataInitializer implements CommandLineRunner {
                 PresentationStock newPs = new PresentationStock();
                 newPs.setPresentationId(def.id());
                 newPs.setEmptyStock(0);
+                return newPs;
+            });
             ps.setCurrentStock(def.stock());
             presentationStockRepository.save(ps);
 

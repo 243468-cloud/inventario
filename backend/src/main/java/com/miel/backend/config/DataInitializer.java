@@ -20,6 +20,7 @@ public class DataInitializer implements CommandLineRunner {
     private final PresentationStockRepository presentationStockRepository;
     private final BulkHoneyInventoryRepository bulkHoneyInventoryRepository;
     private final InventoryItemRepository inventoryItemRepository;
+    private final SalePriceHistoryRepository salePriceHistoryRepository;
 
     @Override
     public void run(String... args) {
@@ -71,6 +72,20 @@ public class DataInitializer implements CommandLineRunner {
             new PresDef(14, "5 kg Miel normal",                5000.00, 0.00, 3)   // 3 piezas verificadas
         );
 
+        // Precios iniciales solicitados
+        // id 12: 150, id 11: 80, id 7: 100, id 1: 100, id 2: 70, id 8: 120, id 9: 120, id 10: 120, id 14: 500
+        java.util.Map<Integer, BigDecimal> initialPrices = java.util.Map.of(
+            12, new BigDecimal("150.00"),
+            11, new BigDecimal("80.00"),
+            7,  new BigDecimal("100.00"),
+            1,  new BigDecimal("100.00"),
+            2,  new BigDecimal("70.00"),
+            8,  new BigDecimal("120.00"),
+            9,  new BigDecimal("120.00"),
+            10, new BigDecimal("120.00"),
+            14, new BigDecimal("500.00")
+        );
+
         for (PresDef def : list) {
             Presentation p = presentationRepository.findById(def.id()).orElseGet(() -> {
                 Presentation newP = new Presentation();
@@ -89,10 +104,21 @@ public class DataInitializer implements CommandLineRunner {
                 PresentationStock newPs = new PresentationStock();
                 newPs.setPresentationId(def.id());
                 newPs.setEmptyStock(0);
-                return newPs;
-            });
             ps.setCurrentStock(def.stock());
             presentationStockRepository.save(ps);
+
+            // Asegurar precio inicial
+            if (initialPrices.containsKey(def.id())) {
+                List<SalePriceHistory> history = salePriceHistoryRepository.findAll();
+                boolean hasPrice = history.stream().anyMatch(h -> h.getPresentationId().equals(def.id()));
+                if (!hasPrice) {
+                    SalePriceHistory sph = new SalePriceHistory();
+                    sph.setPresentationId(def.id());
+                    sph.setSalePrice(initialPrices.get(def.id()));
+                    sph.setEffectiveDate(java.time.LocalDateTime.now());
+                    salePriceHistoryRepository.save(sph);
+                }
+            }
         }
     }
 

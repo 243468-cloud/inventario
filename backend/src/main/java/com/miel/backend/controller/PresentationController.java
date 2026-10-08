@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
+import com.miel.backend.model.SalePriceHistory;
+import com.miel.backend.repository.SalePriceHistoryRepository;
 
 @RestController
 @RequestMapping("/api/presentations")
@@ -19,6 +21,7 @@ public class PresentationController {
 
     private final PresentationRepository presentationRepository;
     private final PresentationStockRepository presentationStockRepository;
+    private final SalePriceHistoryRepository salePriceHistoryRepository;
 
     @GetMapping
     public ResponseEntity<List<Presentation>> getPresentations(@RequestParam(required = false) String is_active) {
@@ -117,5 +120,21 @@ public class PresentationController {
         result.put("presentation_id", id);
         result.put("empty_stock", emptyCount);
         return ResponseEntity.ok(result);
+    }
+
+    /** Agregar un nuevo registro de precio de venta */
+    @PostMapping("/{id}/sale-price")
+    public ResponseEntity<SalePriceHistory> addSalePrice(
+            @PathVariable Integer id,
+            @RequestBody Map<String, java.math.BigDecimal> body) {
+        java.math.BigDecimal price = body.get("sale_price");
+        if (price == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        SalePriceHistory sph = new SalePriceHistory();
+        sph.setPresentationId(id);
+        sph.setSalePrice(price);
+        sph.setEffectiveDate(java.time.LocalDateTime.now());
+        return ResponseEntity.ok(salePriceHistoryRepository.save(sph));
     }
 }

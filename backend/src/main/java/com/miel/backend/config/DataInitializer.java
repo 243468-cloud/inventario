@@ -45,11 +45,6 @@ public class DataInitializer implements CommandLineRunner {
             bulk.setCurrentStockKg(verifiedBulk);
             bulkHoneyInventoryRepository.save(bulk);
             log.info("Inicializado bulk_honey_inventory con {} kg", verifiedBulk);
-        } else {
-            BulkHoneyInventory bulk = bulkOpt.get();
-            bulk.setCurrentStockKg(verifiedBulk);
-            bulkHoneyInventoryRepository.save(bulk);
-            log.info("Actualizado bulk_honey_inventory a {} kg", verifiedBulk);
         }
     }
 
@@ -87,27 +82,33 @@ public class DataInitializer implements CommandLineRunner {
         );
 
         for (PresDef def : list) {
+            boolean isNewP = !presentationRepository.existsById(def.id());
             Presentation p = presentationRepository.findById(def.id()).orElseGet(() -> {
                 Presentation newP = new Presentation();
                 newP.setId(def.id());
                 return newP;
             });
             p.setName(def.name());
-            p.setWeightGrams(BigDecimal.valueOf(def.weight()));
-            p.setContainerCost(BigDecimal.valueOf(def.containerCost()));
             p.setIsActive(true);
-            p.setMinStock(0);
+            if (p.getMinStock() == null) p.setMinStock(0);
+            if (isNewP) {
+                p.setWeightGrams(BigDecimal.valueOf(def.weight()));
+                p.setContainerCost(BigDecimal.valueOf(def.containerCost()));
+            }
             presentationRepository.save(p);
 
             // Asegurar registro de stock físico
+            boolean isNewPs = !presentationStockRepository.existsById(def.id());
             PresentationStock ps = presentationStockRepository.findById(def.id()).orElseGet(() -> {
                 PresentationStock newPs = new PresentationStock();
                 newPs.setPresentationId(def.id());
                 newPs.setEmptyStock(0);
                 return newPs;
             });
-            ps.setCurrentStock(def.stock());
-            presentationStockRepository.save(ps);
+            if (isNewPs) {
+                ps.setCurrentStock(def.stock());
+                presentationStockRepository.save(ps);
+            }
 
             // Asegurar precio inicial
             if (initialPrices.containsKey(def.id())) {
@@ -154,6 +155,7 @@ public class DataInitializer implements CommandLineRunner {
         );
 
         for (ItemDef def : items) {
+            boolean isNew = inventoryItemRepository.findByName(def.name()).isEmpty();
             InventoryItem item = inventoryItemRepository.findByName(def.name()).orElseGet(() -> {
                 InventoryItem newItem = new InventoryItem();
                 newItem.setName(def.name());
@@ -162,9 +164,11 @@ public class DataInitializer implements CommandLineRunner {
             });
             item.setCategory(def.category());
             item.setUnit(def.unit());
-            item.setCurrentStock(BigDecimal.valueOf(def.stock()));
-            item.setCostPerUnit(BigDecimal.valueOf(def.cost()));
             item.setIsActive(true);
+            if (isNew) {
+                item.setCurrentStock(BigDecimal.valueOf(def.stock()));
+                item.setCostPerUnit(BigDecimal.valueOf(def.cost()));
+            }
             inventoryItemRepository.save(item);
         }
     }

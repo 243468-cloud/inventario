@@ -15,7 +15,7 @@ export default function CostosYPrecios() {
   const fetchData = async () => {
     try {
       const [bulkRes, presRes] = await Promise.all([
-        apiFetch('/costs'),
+        apiFetch('/costs/bulk-honey'),
         apiFetch('/presentations')
       ]);
       if (bulkRes.ok) {

@@ -11,6 +11,8 @@ export const viewport: Viewport = {
   themeColor: '#fffdf5',
   minimumScale: 1,
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   width: 'device-width',
   viewportFit: 'cover',
 }
@@ -49,7 +51,7 @@ export default async function RootLayout({
         {token && <NavBar role={role} />}
         {token && <PushNotificationSetup />}
 
-        <main className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 ${token ? 'pt-24 pb-12' : 'min-h-screen flex items-center justify-center'}`}>
+        <main className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 ${token ? 'pt-20 pb-28 md:pt-24 md:pb-12' : 'min-h-screen flex items-center justify-center'}`}>
           {children}
         </main>
       </body>

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HexagonIcon, DashboardIcon, PackageIcon, BeakerIcon, UsersIcon } from '@/components/Icons';
+import { HexagonIcon, DashboardIcon, PackageIcon, BeakerIcon, UsersIcon, PackageMinusIcon } from '@/components/Icons';
 
 interface NavBarProps {
   role?: string;
@@ -17,6 +17,7 @@ export default function NavBar({ role }: NavBarProps) {
     { href: '/almacen', label: 'Almacén', icon: <HexagonIcon /> }, // Using HexagonIcon for raw materials
     { href: '/presentaciones', label: 'Presentaciones', icon: <PackageIcon /> },
     { href: '/produccion', label: 'Producción', icon: <BeakerIcon /> },
+    { href: '/salidas', label: 'Salidas', icon: <PackageMinusIcon /> },
     { href: '/precios', label: 'Costos y Precios', icon: <HexagonIcon /> },
     ...(role === 'SUPER_ADMIN' ? [{ href: '/usuarios', label: 'Usuarios', icon: <UsersIcon /> }] : []),
   ];

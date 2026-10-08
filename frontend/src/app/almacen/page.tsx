@@ -34,12 +34,15 @@ const defaultForm = { name: '', category: 'CONTAINER', unit: 'PIECE', minStock: 
 export default function Almacen() {
   const [items, setItems] = useState<InventoryItem[]>([]);
 
-  // Entry form
+  // Movement form (Entrada / Salida)
+  const [movementMode, setMovementMode] = useState<'ENTRADA' | 'SALIDA'>('ENTRADA');
   const [selectedItemId, setSelectedItemId] = useState('');
   const [formatType, setFormatType] = useState('PIEZA');
   const [quantity, setQuantity] = useState('');
+  const [exitReason, setExitReason] = useState('VENTA_DIRECTA');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [entrySuccess, setEntrySuccess] = useState('');
+  const [entryError, setEntryError] = useState('');
 
   // Item management modal
   const [showModal, setShowModal] = useState(false);
@@ -58,33 +61,56 @@ export default function Almacen() {
 
   useEffect(() => { fetchData(); }, []);
 
-  // ── Entry Form ────────────────────────────────────────────
-  const handleEntrySubmit = async (e: React.FormEvent) => {
+  // ── Movement Submit (Entrada o Salida) ────────────────────
+  const handleMovementSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setEntrySuccess('');
+    setEntryError('');
     try {
       let baseQty = Number(quantity);
       if (formatType === 'CUBETA') baseQty = baseQty * 27;
       if (formatType === 'GALON') baseQty = baseQty * 25;
 
-      const res = await apiFetch('/almacen/entradas', {
+      const endpoint = movementMode === 'ENTRADA' ? '/almacen/entradas' : '/almacen/salidas';
+      const body = movementMode === 'ENTRADA'
+        ? {
+            inventoryItemId: Number(selectedItemId),
+            formatType,
+            formatQuantity: Number(quantity),
+            totalBaseQuantity: baseQty
+          }
+        : {
+            inventoryItemId: Number(selectedItemId),
+            formatType,
+            formatQuantity: Number(quantity),
+            totalBaseQuantity: baseQty,
+            reason: exitReason
+          };
+
+      const res = await apiFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inventoryItemId: Number(selectedItemId),
-          formatType,
-          formatQuantity: Number(quantity),
-          totalBaseQuantity: baseQty
-        })
+        body: JSON.stringify(body)
       });
+
       if (res.ok) {
-        setQuantity(''); setSelectedItemId('');
-        setEntrySuccess('¡Entrada registrada correctamente!');
+        setQuantity(''); 
+        setSelectedItemId('');
+        setEntrySuccess(
+          movementMode === 'ENTRADA'
+            ? '¡Entrada registrada correctamente!'
+            : '¡Salida registrada correctamente!'
+        );
         fetchData();
-        setTimeout(() => setEntrySuccess(''), 3000);
+        setTimeout(() => setEntrySuccess(''), 3500);
+      } else {
+        const err = await res.json().catch(() => null);
+        setEntryError(err?.message || 'Error al procesar la operación. Verifica los datos.');
       }
-    } catch (e) { console.error(e); }
+    } catch { 
+      setEntryError('Error de conexión con el servidor.');
+    }
     setIsSubmitting(false);
   };
 
@@ -179,10 +205,39 @@ export default function Almacen() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left Col: Entry Form */}
+          {/* Left Col: Movement Form (Entrada / Salida) */}
           <div className="md:col-span-1">
             <div className="bg-white/70 backdrop-blur-xl p-6 rounded-3xl shadow-sm border border-white/40 sticky top-24">
-              <h3 className="text-lg font-extrabold mb-4 text-[#2c4c3b]">Registrar Entrada</h3>
+              
+              {/* Tabs Entrada / Salida */}
+              <div className="flex p-1 bg-stone-200/70 rounded-2xl mb-5 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => { setMovementMode('ENTRADA'); setEntrySuccess(''); setEntryError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                    movementMode === 'ENTRADA'
+                      ? 'bg-white text-[#2c4c3b] shadow-sm'
+                      : 'text-stone-500 hover:text-stone-800'
+                  }`}
+                >
+                  Entrada (+)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setMovementMode('SALIDA'); setEntrySuccess(''); setEntryError(''); }}
+                  className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
+                    movementMode === 'SALIDA'
+                      ? 'bg-white text-red-700 shadow-sm'
+                      : 'text-stone-500 hover:text-stone-800'
+                  }`}
+                >
+                  Salida (-)
+                </button>
+              </div>
+
+              <h3 className={`text-lg font-extrabold mb-4 ${movementMode === 'ENTRADA' ? 'text-[#2c4c3b]' : 'text-red-700'}`}>
+                {movementMode === 'ENTRADA' ? 'Registrar Entrada' : 'Registrar Salida de Material'}
+              </h3>
 
               {entrySuccess && (
                 <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-sm font-bold animate-in fade-in">
@@ -190,7 +245,13 @@ export default function Almacen() {
                 </div>
               )}
 
-              <form onSubmit={handleEntrySubmit} className="space-y-4">
+              {entryError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-sm font-bold animate-in fade-in">
+                  {entryError}
+                </div>
+              )}
+
+              <form onSubmit={handleMovementSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Material</label>
                   <select
@@ -199,13 +260,15 @@ export default function Almacen() {
                   >
                     <option value="" disabled>Selecciona un material...</option>
                     {items.filter(i => i.isActive).map(i => (
-                      <option key={i.id} value={i.id}>{i.name} ({CATEGORY_LABELS[i.category] ?? i.category})</option>
+                      <option key={i.id} value={i.id}>{i.name} (Stock: {i.currentStock})</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Formato de Entrada</label>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">
+                    {movementMode === 'ENTRADA' ? 'Formato de Entrada' : 'Formato de Salida'}
+                  </label>
                   <select
                     required value={formatType} onChange={e => setFormatType(e.target.value)}
                     className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#e07a5f] font-medium text-gray-800"
@@ -220,17 +283,39 @@ export default function Almacen() {
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Cantidad ({formatType}S)</label>
                   <input
-                    required value={quantity} onChange={e => setQuantity(e.target.value)} type="number" min="1" step="any"
+                    required value={quantity} onChange={e => setQuantity(e.target.value)} type="number" min="0.1" step="any"
                     className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] font-medium text-gray-800"
                     placeholder="Ej. 10"
                   />
                 </div>
 
+                {movementMode === 'SALIDA' && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Motivo de Salida</label>
+                    <select
+                      required value={exitReason} onChange={e => setExitReason(e.target.value)}
+                      className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium text-gray-800"
+                    >
+                      <option value="VENTA_DIRECTA">Venta Directa</option>
+                      <option value="MERMA">Merma / Rotura</option>
+                      <option value="CONSUMO_INTERNO">Consumo Interno</option>
+                      <option value="AJUSTE">Ajuste de Conteo</option>
+                    </select>
+                  </div>
+                )}
+
                 <button
                   type="submit" disabled={isSubmitting}
-                  className="w-full py-3 bg-gradient-to-r from-[#2c4c3b] to-[#3a634d] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                  className={`w-full py-3 text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 ${
+                    movementMode === 'ENTRADA'
+                      ? 'bg-gradient-to-r from-[#2c4c3b] to-[#3a634d]'
+                      : 'bg-gradient-to-r from-[#9e2a2b] to-[#ba181b]'
+                  }`}
                 >
-                  {isSubmitting ? 'Guardando...' : 'Registrar Entrada'}
+                  {isSubmitting 
+                    ? 'Procesando...' 
+                    : (movementMode === 'ENTRADA' ? 'Registrar Entrada' : 'Registrar Salida')
+                  }
                 </button>
               </form>
             </div>

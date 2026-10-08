@@ -133,4 +133,72 @@ public class InventoryService {
         presentationIn.setReferenceId(batch.getId());
         movementRepository.save(presentationIn);
     }
+
+    @Transactional
+    public void registerPresentationExit(Integer presentationId, Integer quantity, String reason, String notes) {
+        if (quantity == null || quantity <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0");
+        }
+
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> new RuntimeException("Presentación no encontrada"));
+
+        PresentationStock stock = stockRepository.findById(presentationId)
+                .orElseThrow(() -> new RuntimeException("No existe registro de stock para " + presentation.getName()));
+
+        if (stock.getCurrentStock() < quantity) {
+            throw new RuntimeException(
+                "Stock insuficiente de " + presentation.getName() + ". Solo hay " +
+                stock.getCurrentStock() + " piezas disponibles y se solicitaron " + quantity + "."
+            );
+        }
+
+        stock.setCurrentStock(stock.getCurrentStock() - quantity);
+        stockRepository.save(stock);
+
+        StockMovement movement = new StockMovement();
+        movement.setItemType("PRESENTATION");
+        movement.setPresentationId(presentationId);
+        movement.setMovementType("OUT");
+        movement.setQuantity(new BigDecimal(quantity));
+        String ref = (reason != null && !reason.isBlank()) ? reason : "SALIDA";
+        if (notes != null && !notes.isBlank()) {
+            ref += " (" + notes + ")";
+        }
+        movement.setReferenceType(ref);
+        movementRepository.save(movement);
+    }
+
+    @Transactional
+    public void registerPresentationEntry(Integer presentationId, Integer quantity, String reason, String notes) {
+        if (quantity == null || quantity <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0");
+        }
+
+        Presentation presentation = presentationRepository.findById(presentationId)
+                .orElseThrow(() -> new RuntimeException("Presentación no encontrada"));
+
+        PresentationStock stock = stockRepository.findById(presentationId).orElseGet(() -> {
+            PresentationStock s = new PresentationStock();
+            s.setPresentationId(presentationId);
+            s.setCurrentStock(0);
+            s.setEmptyStock(0);
+            return s;
+        });
+
+        stock.setCurrentStock(stock.getCurrentStock() + quantity);
+        stockRepository.save(stock);
+
+        StockMovement movement = new StockMovement();
+        movement.setItemType("PRESENTATION");
+        movement.setPresentationId(presentationId);
+        movement.setMovementType("IN");
+        movement.setQuantity(new BigDecimal(quantity));
+        String ref = (reason != null && !reason.isBlank()) ? reason : "ALTA_INVENTARIO";
+        if (notes != null && !notes.isBlank()) {
+            ref += " (" + notes + ")";
+        }
+        movement.setReferenceType(ref);
+        movementRepository.save(movement);
+    }
 }

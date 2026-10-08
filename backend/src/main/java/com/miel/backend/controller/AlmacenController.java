@@ -1,15 +1,22 @@
 package com.miel.backend.controller;
 
+import com.miel.backend.model.InventoryExit;
 import com.miel.backend.model.InventoryItem;
 import com.miel.backend.model.PurchaseEntry;
+import com.miel.backend.model.StockMovement;
+import com.miel.backend.repository.InventoryExitRepository;
 import com.miel.backend.repository.InventoryItemRepository;
 import com.miel.backend.repository.PurchaseEntryRepository;
+import com.miel.backend.repository.RecipeItemRepository;
+import com.miel.backend.repository.StockMovementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/almacen")
@@ -18,7 +25,9 @@ public class AlmacenController {
 
     private final InventoryItemRepository inventoryItemRepository;
     private final PurchaseEntryRepository purchaseEntryRepository;
-    private final com.miel.backend.repository.RecipeItemRepository recipeItemRepository;
+    private final InventoryExitRepository inventoryExitRepository;
+    private final RecipeItemRepository recipeItemRepository;
+    private final StockMovementRepository stockMovementRepository;
 
     @GetMapping("/items")
     public ResponseEntity<List<InventoryItem>> getInventoryItems() {
@@ -62,10 +71,81 @@ public class AlmacenController {
     @PostMapping("/entradas")
     public ResponseEntity<PurchaseEntry> registerEntry(@RequestBody PurchaseEntry entry) {
         InventoryItem item = inventoryItemRepository.findById(entry.getInventoryItemId())
-                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Material no encontrado"));
+        
         item.setCurrentStock(item.getCurrentStock().add(entry.getTotalBaseQuantity()));
         inventoryItemRepository.save(item);
-        return ResponseEntity.ok(purchaseEntryRepository.save(entry));
+        PurchaseEntry saved = purchaseEntryRepository.save(entry);
+
+        StockMovement mov = new StockMovement();
+        mov.setItemType("INVENTORY_ITEM");
+        mov.setMovementType("IN");
+        mov.setQuantity(entry.getTotalBaseQuantity());
+        mov.setReferenceType("COMPRA_ENTRADA");
+        mov.setReferenceId(item.getId());
+        stockMovementRepository.save(mov);
+
+        return ResponseEntity.ok(saved);
+    }
+
+    @PostMapping("/salidas")
+    public ResponseEntity<InventoryExit> registerExit(@RequestBody InventoryExit exit) {
+        InventoryItem item = inventoryItemRepository.findById(exit.getInventoryItemId())
+                .orElseThrow(() -> new RuntimeException("Material no encontrado"));
+
+        if (exit.getTotalBaseQuantity() == null || exit.getTotalBaseQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0");
+        }
+
+        if (item.getCurrentStock().compareTo(exit.getTotalBaseQuantity()) < 0) {
+            throw new RuntimeException(
+                "Stock insuficiente en almacén. Disponible: " + item.getCurrentStock() + " " + item.getUnit() +
+                ", solicitados: " + exit.getTotalBaseQuantity()
+            );
+        }
+
+        item.setCurrentStock(item.getCurrentStock().subtract(exit.getTotalBaseQuantity()));
+        inventoryItemRepository.save(item);
+
+        InventoryExit saved = inventoryExitRepository.save(exit);
+
+        StockMovement mov = new StockMovement();
+        mov.setItemType("INVENTORY_ITEM");
+        mov.setMovementType("OUT");
+        mov.setQuantity(exit.getTotalBaseQuantity());
+        String ref = exit.getReason() != null ? exit.getReason() : "SALIDA";
+        if (exit.getNotes() != null && !exit.getNotes().isBlank()) {
+            ref += " (" + exit.getNotes() + ")";
+        }
+        mov.setReferenceType(ref);
+        mov.setReferenceId(item.getId());
+        stockMovementRepository.save(mov);
+
+        return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/salidas")
+    public ResponseEntity<List<Map<String, Object>>> getRecentExits() {
+        List<InventoryExit> exits = inventoryExitRepository.findAllByOrderByExitDateDesc();
+        List<Map<String, Object>> result = exits.stream().limit(50).map(e -> {
+            String itemName = "Material #" + e.getInventoryItemId();
+            var itemOpt = inventoryItemRepository.findById(e.getInventoryItemId());
+            if (itemOpt.isPresent()) {
+                itemName = itemOpt.get().getName();
+            }
+            return Map.<String, Object>of(
+                "id", e.getId(),
+                "inventoryItemId", e.getInventoryItemId(),
+                "itemName", itemName,
+                "formatType", e.getFormatType(),
+                "formatQuantity", e.getFormatQuantity(),
+                "totalBaseQuantity", e.getTotalBaseQuantity(),
+                "reason", e.getReason(),
+                "notes", e.getNotes() != null ? e.getNotes() : "",
+                "exitDate", e.getExitDate() != null ? e.getExitDate().toString() : ""
+            );
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/recipes")

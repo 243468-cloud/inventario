@@ -123,7 +123,19 @@ CREATE TABLE IF NOT EXISTS purchase_entries (
     entry_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 12. RECETAS POR PRESENTACIÓN
+-- 12. SALIDAS DE ALMACÉN
+CREATE TABLE IF NOT EXISTS inventory_exits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    inventory_item_id INT NOT NULL,
+    format_type VARCHAR(50) NOT NULL,
+    format_quantity DECIMAL(10,2) NOT NULL,
+    total_base_quantity DECIMAL(10,2) NOT NULL,
+    reason VARCHAR(100) NOT NULL,
+    notes VARCHAR(255),
+    exit_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13. RECETAS POR PRESENTACIÓN
 CREATE TABLE IF NOT EXISTS recipe_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     presentation_id INT NOT NULL,

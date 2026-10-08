@@ -21,9 +21,9 @@ public class JwtTokenProvider {
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    /** Expiración en ms. Default: 4 horas (14 400 000 ms) */
-    @Value("${app.jwtExpirationMs:14400000}")
-    private int jwtExpirationMs;
+    /** Expiración en ms. Default: 1 año (31 536 000 000 ms) para mantener sesión iniciada */
+    @Value("${app.jwtExpirationMs:31536000000}")
+    private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);

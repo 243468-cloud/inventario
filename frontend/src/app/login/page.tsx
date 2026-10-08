@@ -57,8 +57,8 @@ export default function Login() {
         const secureFlag = isHttps ? '; Secure' : '';
 
         // SameSite=Lax y Secure son obligatorios para que iOS Safari envíe cookies en redirecciones
-        document.cookie = `auth_token=${data.accessToken}; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
-        document.cookie = `user_role=${data.role}; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
+        document.cookie = `auth_token=${data.accessToken}; path=/; max-age=31536000; SameSite=Lax${secureFlag}`;
+        document.cookie = `user_role=${data.role}; path=/; max-age=31536000; SameSite=Lax${secureFlag}`;
 
         // Respaldo en localStorage
         try {

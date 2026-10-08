@@ -62,6 +62,7 @@ public class AlmacenController {
                 if (update.getUnit() != null) item.setUnit(update.getUnit());
                 if (update.getMinStock() != null) item.setMinStock(update.getMinStock());
                 if (update.getCostPerUnit() != null) item.setCostPerUnit(update.getCostPerUnit());
+                if (update.getCurrentStock() != null) item.setCurrentStock(update.getCurrentStock());
                 if (update.getIsActive() != null) item.setIsActive(update.getIsActive());
                 return ResponseEntity.ok(inventoryItemRepository.save(item));
             })

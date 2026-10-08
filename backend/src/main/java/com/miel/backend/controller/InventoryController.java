@@ -32,6 +32,8 @@ public class InventoryController {
     private final StockMovementRepository stockMovementRepository;
     private final PresentationRepository presentationRepository;
     private final InventoryItemRepository inventoryItemRepository;
+    private final com.miel.backend.repository.PurchaseEntryRepository purchaseEntryRepository;
+    private final com.miel.backend.repository.InventoryExitRepository inventoryExitRepository;
 
     @GetMapping("/real-time")
     public ResponseEntity<List<RealTimeInventoryDTO>> getRealTimeInventory() {
@@ -137,6 +139,29 @@ public class InventoryController {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    }
+
+    @DeleteMapping("/history/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<Void> deleteHistory(@PathVariable Integer id) {
+        Optional<StockMovement> mOpt = stockMovementRepository.findById(id);
+        if (mOpt.isEmpty()) return ResponseEntity.notFound().build();
+        StockMovement m = mOpt.get();
+
+        if ("IN".equals(m.getMovementType()) && "INVENTORY_ITEM".equals(m.getItemType()) && m.getReferenceId() != null) {
+            purchaseEntryRepository.findByInventoryItemIdOrderByEntryDateDesc(m.getReferenceId()).stream()
+                .filter(pe -> pe.getTotalBaseQuantity().compareTo(m.getQuantity()) == 0)
+                .findFirst()
+                .ifPresent(pe -> purchaseEntryRepository.delete(pe));
+        } else if ("OUT".equals(m.getMovementType()) && "INVENTORY_ITEM".equals(m.getItemType()) && m.getReferenceId() != null) {
+            inventoryExitRepository.findAllByOrderByExitDateDesc().stream()
+                .filter(ex -> ex.getInventoryItemId().equals(m.getReferenceId()) && ex.getTotalBaseQuantity().compareTo(m.getQuantity()) == 0)
+                .findFirst()
+                .ifPresent(ex -> inventoryExitRepository.delete(ex));
+        }
+
+        stockMovementRepository.delete(m);
+        return ResponseEntity.ok().build();
     }
 
     @Data

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/push")
+@RequestMapping("/api/push")
 public class PushController {
 
     private final PushNotificationService pushService;

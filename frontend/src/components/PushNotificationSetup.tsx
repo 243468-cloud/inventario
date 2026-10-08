@@ -33,7 +33,17 @@ export default function PushNotificationSetup() {
 
         // 3. Obtener la VAPID public key del backend
         const keyRes = await apiFetch('/push/vapid-public-key');
-        const { publicKey } = await keyRes.json();
+        if (!keyRes.ok) {
+          console.warn('[Push] No se pudo obtener la clave VAPID pública del servidor (status:', keyRes.status, ')');
+          return;
+        }
+
+        const data = await keyRes.json();
+        const publicKey = data?.publicKey;
+        if (!publicKey) {
+          console.warn('[Push] La respuesta no contiene publicKey válida.');
+          return;
+        }
 
         // 4. Suscribirse al push server del navegador
         const subscription = await registration.pushManager.subscribe({

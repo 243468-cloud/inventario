@@ -189,7 +189,7 @@ export default function SalidasPage() {
 
     const qty = Number(whQuantity);
     let baseQty = qty;
-    if (whFormat === 'CUBETA') baseQty = qty * 27;
+    if (whFormat === 'CUBETA') baseQty = qty * 24.5;
     if (whFormat === 'GALON') baseQty = qty * 25;
 
     const selectedItem = warehouseItems.find(i => i.id === Number(whItemId));

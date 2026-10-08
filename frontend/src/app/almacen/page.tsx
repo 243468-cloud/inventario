@@ -69,7 +69,7 @@ export default function Almacen() {
     setEntryError('');
     try {
       let baseQty = Number(quantity);
-      if (formatType === 'CUBETA') baseQty = baseQty * 27;
+      if (formatType === 'CUBETA') baseQty = baseQty * 24.5;
       if (formatType === 'GALON') baseQty = baseQty * 25;
 
       const endpoint = movementMode === 'ENTRADA' ? '/almacen/entradas' : '/almacen/salidas';

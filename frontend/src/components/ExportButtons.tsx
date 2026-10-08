@@ -50,12 +50,12 @@ export default function ExportButtons({ token, role }: { token: string; role?: s
         id="btn-export-excel"
         onClick={() => downloadFile(`${API_URL}/reports/export/inventory`, 'inventario_miel.xlsx', 'excel')}
         disabled={isExportingExcel}
-        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 hover:border-stone-300 transition-colors shadow-sm disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-amber-700 bg-white border border-amber-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 transition-colors shadow-sm disabled:opacity-50"
       >
         {isExportingExcel ? (
-          <span className="w-3.5 h-3.5 border-2 border-stone-600 border-t-transparent rounded-full animate-spin" />
+          <span className="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
         ) : (
-          <DownloadIcon className="w-3.5 h-3.5 text-stone-500" />
+          <DownloadIcon className="w-3.5 h-3.5 text-amber-500" />
         )}
         Excel
       </button>
@@ -64,12 +64,12 @@ export default function ExportButtons({ token, role }: { token: string; role?: s
         id="btn-export-pdf"
         onClick={() => downloadFile(`${API_URL}/reports/export/pdf`, 'inventario_miel.pdf', 'pdf')}
         disabled={isExportingPdf}
-        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-stone-700 bg-white border border-stone-200 rounded-lg hover:bg-stone-50 hover:border-stone-300 transition-colors shadow-sm disabled:opacity-50"
+        className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-amber-700 bg-white border border-amber-200 rounded-lg hover:bg-amber-50 hover:border-amber-300 transition-colors shadow-sm disabled:opacity-50"
       >
         {isExportingPdf ? (
-          <span className="w-3.5 h-3.5 border-2 border-stone-600 border-t-transparent rounded-full animate-spin" />
+          <span className="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin" />
         ) : (
-          <FileTextIcon className="w-3.5 h-3.5 text-stone-500" />
+          <FileTextIcon className="w-3.5 h-3.5 text-amber-500" />
         )}
         PDF
       </button>

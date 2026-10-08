@@ -152,8 +152,8 @@ export default function Login() {
   return (
     <div className="w-full flex items-center justify-center relative perspective-1000">
       {/* Decorative floating shapes */}
-      <div className="absolute top-1/4 left-[15%] text-[#e07a5f]/15 animate-float hidden md:block"><HexagonIcon /></div>
-      <div className="absolute bottom-1/4 right-[20%] text-[#2c4c3b]/10 animate-float-delayed hidden md:block scale-150"><HexagonIcon /></div>
+      <div className="absolute top-1/4 left-[15%] text-[#ea580c]/15 animate-float hidden md:block"><HexagonIcon /></div>
+      <div className="absolute bottom-1/4 right-[20%] text-[#d97706]/10 animate-float-delayed hidden md:block scale-150"><HexagonIcon /></div>
       <div className="absolute top-10 right-[30%] text-[#d4a373]/20 animate-float hidden md:block scale-75"><HexagonIcon /></div>
 
       <div className="bg-white/80 backdrop-blur-2xl p-10 rounded-[2.5rem] shadow-[0_30px_80px_-20px_rgba(44,76,59,0.2)] border border-white/60 w-full max-w-md opacity-0 animate-slide-up-fade relative z-10 overflow-hidden group">
@@ -162,10 +162,10 @@ export default function Login() {
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 opacity-0 animate-slide-up-fade delay-100">
-          <div className="p-4 bg-gradient-to-tr from-[#2c4c3b] to-[#3a634d] rounded-2xl shadow-xl shadow-[#2c4c3b]/30 text-[#fffdf5] mb-4 transform -rotate-6 group-hover:rotate-12 transition-transform duration-700 ease-out">
+          <div className="p-4 bg-gradient-to-tr from-[#d97706] to-[#f59e0b] rounded-2xl shadow-xl shadow-[#d97706]/30 text-[#fffdf5] mb-4 transform -rotate-6 group-hover:rotate-12 transition-transform duration-700 ease-out">
             <HexagonIcon />
           </div>
-          <h1 className="text-3xl font-black text-[#2c4c3b] tracking-tight">
+          <h1 className="text-3xl font-black text-[#d97706] tracking-tight">
             {mode === 'login' ? 'Bienvenido' : 'Crear Cuenta'}
           </h1>
           <p className="text-gray-500 font-medium mt-1 text-sm">
@@ -181,8 +181,8 @@ export default function Login() {
             onClick={() => reset('login')}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
               mode === 'login'
-                ? 'bg-white text-[#2c4c3b] shadow-sm'
-                : 'text-gray-500 hover:text-[#2c4c3b]'
+                ? 'bg-white text-[#d97706] shadow-sm'
+                : 'text-gray-500 hover:text-[#d97706]'
             }`}
           >
             Ingresar
@@ -193,8 +193,8 @@ export default function Login() {
             onClick={() => reset('register')}
             className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
               mode === 'register'
-                ? 'bg-white text-[#2c4c3b] shadow-sm'
-                : 'text-gray-500 hover:text-[#2c4c3b]'
+                ? 'bg-white text-[#d97706] shadow-sm'
+                : 'text-gray-500 hover:text-[#d97706]'
             }`}
           >
             Registrarse
@@ -225,7 +225,7 @@ export default function Login() {
               title="Solo letras, números y guiones bajos (3-20 caracteres)"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-[#2c4c3b]/20 focus:border-[#2c4c3b] transition-all font-medium text-[#2c4c3b] hover:bg-white/80"
+              className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-[#d97706]/20 focus:border-[#d97706] transition-all font-medium text-[#d97706] hover:bg-white/80"
               placeholder={mode === 'login' ? 'Tu usuario' : 'Elige un nombre de usuario'}
               minLength={3}
               maxLength={20}
@@ -243,7 +243,7 @@ export default function Login() {
                 title="La contraseña debe tener entre 6 y 50 caracteres y no contener < o >"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 pr-12 focus:outline-none focus:ring-4 focus:ring-[#2c4c3b]/20 focus:border-[#2c4c3b] transition-all font-medium text-[#2c4c3b] hover:bg-white/80"
+                className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 pr-12 focus:outline-none focus:ring-4 focus:ring-[#d97706]/20 focus:border-[#d97706] transition-all font-medium text-[#d97706] hover:bg-white/80"
                 placeholder="••••••••"
                 minLength={6}
                 maxLength={50}
@@ -251,7 +251,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#2c4c3b] transition-colors p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#d97706] transition-colors p-1"
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -273,7 +273,7 @@ export default function Login() {
                 title="La contraseña debe tener entre 6 y 50 caracteres y no contener < o >"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
-                className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-[#2c4c3b]/20 focus:border-[#2c4c3b] transition-all font-medium text-[#2c4c3b] hover:bg-white/80"
+                className="w-full bg-white/50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-4 focus:ring-[#d97706]/20 focus:border-[#d97706] transition-all font-medium text-[#d97706] hover:bg-white/80"
                 placeholder="Repite tu contraseña"
                 minLength={6}
                 maxLength={50}
@@ -286,7 +286,7 @@ export default function Login() {
               id="btn-submit"
               type="submit"
               disabled={isLoading}
-              className="relative overflow-hidden w-full bg-gradient-to-r from-[#e07a5f] to-[#d46d53] text-white font-bold text-base py-4 rounded-xl hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-70 disabled:hover:translate-y-0 group/btn"
+              className="relative overflow-hidden w-full bg-gradient-to-r from-[#ea580c] to-[#d46d53] text-white font-bold text-base py-4 rounded-xl hover:-translate-y-1 transition-all active:scale-95 disabled:opacity-70 disabled:hover:translate-y-0 group/btn"
             >
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/30 to-white/0 -translate-x-full group-hover/btn:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
               <span className="relative z-10 flex items-center justify-center gap-2">

@@ -44,7 +44,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png?v=2" />
         <link rel="shortcut icon" href="/apple-touch-icon.png?v=2" />
       </head>
-      <body className={`${outfit.variable} font-sans bg-[#fafaf9] min-h-screen text-stone-900 selection:bg-stone-800 selection:text-white`}>
+      <body className={`${outfit.variable} font-sans bg-[#fafaf9] min-h-screen text-amber-900 selection:bg-amber-800 selection:text-white`}>
 
         {token && <NavBar role={role} />}
         {token && <PushNotificationSetup />}

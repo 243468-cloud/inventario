@@ -26,14 +26,14 @@ export default function NavBar({ role }: NavBarProps) {
     href === '/' ? pathname === '/' : pathname.startsWith(href);
 
   return (
-    <nav className="fixed w-full z-50 top-0 bg-white/80 backdrop-blur-md border-b border-stone-200/80">
+    <nav className="fixed w-full z-50 top-0 bg-white/80 backdrop-blur-md border-b border-amber-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2.5" onClick={() => setOpen(false)}>
-          <div className="w-8 h-8 rounded-lg bg-stone-900 flex items-center justify-center text-white">
+          <div className="w-8 h-8 rounded-lg bg-amber-900 flex items-center justify-center text-white">
             <HexagonIcon className="w-4 h-4" />
           </div>
-          <span className="text-base font-bold tracking-tight text-stone-900">
+          <span className="text-base font-bold tracking-tight text-amber-900">
             Selva Maya
           </span>
         </Link>
@@ -46,8 +46,8 @@ export default function NavBar({ role }: NavBarProps) {
               href={href}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors
                 ${isActive(href)
-                  ? 'bg-stone-100 text-stone-900 font-semibold'
-                  : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+                  ? 'bg-amber-100 text-amber-900 font-semibold'
+                  : 'text-amber-600 hover:bg-amber-50 hover:text-amber-900'
                 }`}
             >
               {icon}
@@ -71,12 +71,12 @@ export default function NavBar({ role }: NavBarProps) {
         <button
           id="nav-hamburger"
           onClick={() => setOpen(!open)}
-          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 transition-colors"
+          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl bg-amber-100 hover:bg-amber-200 transition-colors"
           aria-label="Abrir menú"
         >
-          <span className={`block w-5 h-0.5 bg-stone-900 transition-all duration-300 ${open ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <span className={`block w-5 h-0.5 bg-stone-900 my-1 transition-all duration-300 ${open ? 'opacity-0' : ''}`} />
-          <span className={`block w-5 h-0.5 bg-stone-900 transition-all duration-300 ${open ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-amber-900 transition-all duration-300 ${open ? 'rotate-45 translate-y-1.5' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-amber-900 my-1 transition-all duration-300 ${open ? 'opacity-0' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-amber-900 transition-all duration-300 ${open ? '-rotate-45 -translate-y-1.5' : ''}`} />
         </button>
       </div>
 
@@ -90,8 +90,8 @@ export default function NavBar({ role }: NavBarProps) {
               onClick={() => setOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
                 ${isActive(href)
-                  ? 'bg-stone-900 text-white shadow-md'
-                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                  ? 'bg-amber-900 text-white shadow-md'
+                  : 'text-amber-600 hover:bg-amber-100 hover:text-amber-900'
                 }`}
             >
               {icon}

@@ -95,7 +95,7 @@ export default function GeofenceWrapper({ children }: GeofenceWrapperProps) {
   if (isWithinFence === null && !error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-in fade-in duration-500">
-        <Loader2 className="w-12 h-12 text-[#e07a5f] animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-[#ea580c] animate-spin mb-4" />
         <h2 className="text-xl font-bold text-gray-800">Verificando Seguridad GPS...</h2>
         <p className="text-gray-500 mt-2 max-w-md">
           Por favor, permite el acceso a tu ubicación en tu navegador para asegurar que estás dentro de la sucursal.
@@ -115,7 +115,7 @@ export default function GeofenceWrapper({ children }: GeofenceWrapperProps) {
           {error}
         </p>
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center gap-4 text-left">
-          <div className="bg-[#2c4c3b] p-3 rounded-lg text-white">
+          <div className="bg-[#d97706] p-3 rounded-lg text-white">
             <MapPin className="w-6 h-6" />
           </div>
           <div>
@@ -127,7 +127,7 @@ export default function GeofenceWrapper({ children }: GeofenceWrapperProps) {
         {distance && distance > ALLOWED_RADIUS_METERS && (
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-8 px-6 py-3 bg-[#e07a5f] hover:bg-[#d0694e] text-white font-bold rounded-xl transition-all shadow-md active:scale-95"
+            className="mt-8 px-6 py-3 bg-[#ea580c] hover:bg-[#d0694e] text-white font-bold rounded-xl transition-all shadow-md active:scale-95"
           >
             Reintentar Ubicación
           </button>

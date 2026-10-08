@@ -243,35 +243,35 @@ export default function SalidasPage() {
   const selectedWhItem = whItemId ? warehouseItems.find(i => i.id === Number(whItemId)) : null;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pb-16 font-sans text-stone-800">
+    <div className="min-h-screen bg-[#f8f9fa] pb-16 font-sans text-amber-800">
       <GeofenceWrapper>
         <div className="max-w-4xl mx-auto pt-6 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-stone-200/80 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-amber-200/80 gap-4">
             <div className="flex items-center gap-4">
               <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-[#9e2a2b] to-[#c1121f] text-white shadow-lg shadow-red-900/20 flex items-center justify-center flex-shrink-0">
                 <PackageMinusIcon className="w-7 h-7" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-[#2c4c3b] tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-[#d97706] tracking-tight">
                   Registro de Salidas
                 </h1>
-                <p className="text-stone-500 text-sm mt-0.5">
+                <p className="text-amber-500 text-sm mt-0.5">
                   Descuenta ventas, mermas, degustaciones o ajustes de inventario
                 </p>
               </div>
             </div>
 
             {/* Quick Pill Tabs */}
-            <div className="inline-flex p-1 bg-stone-200/70 rounded-2xl self-start sm:self-auto shadow-inner">
+            <div className="inline-flex p-1 bg-amber-200/70 rounded-2xl self-start sm:self-auto shadow-inner">
               <button
                 type="button"
                 onClick={() => setActiveTab('PRODUCTO')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'PRODUCTO'
-                    ? 'bg-white text-[#2c4c3b] shadow-sm'
-                    : 'text-stone-600 hover:text-stone-900'
+                    ? 'bg-white text-[#d97706] shadow-sm'
+                    : 'text-amber-600 hover:text-amber-900'
                 }`}
               >
                 <PackageIcon className="w-4 h-4" />
@@ -282,8 +282,8 @@ export default function SalidasPage() {
                 onClick={() => setActiveTab('ALMACEN')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'ALMACEN'
-                    ? 'bg-white text-[#2c4c3b] shadow-sm'
-                    : 'text-stone-600 hover:text-stone-900'
+                    ? 'bg-white text-[#d97706] shadow-sm'
+                    : 'text-amber-600 hover:text-amber-900'
                 }`}
               >
                 <HexagonIcon className="w-4 h-4" />
@@ -293,17 +293,17 @@ export default function SalidasPage() {
           </div>
 
           {/* Form Container */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_4px_25px_rgb(0,0,0,0.05)] border border-stone-200/80 mb-10">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_4px_25px_rgb(0,0,0,0.05)] border border-amber-200/80 mb-10">
             
             {/* TAB 1: PRODUCTO TERMINADO (PRESENTACIONES) */}
             {activeTab === 'PRODUCTO' && (
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-black text-stone-900">
+                    <h2 className="text-lg sm:text-xl font-black text-amber-900">
                       Salida de Producto Envasado
                     </h2>
-                    <p className="text-xs sm:text-sm text-stone-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-amber-500 mt-0.5">
                       Frascos y botellas listos para venta al cliente o baja por merma.
                     </p>
                   </div>
@@ -329,7 +329,7 @@ export default function SalidasPage() {
                     {/* Selector de Presentación */}
                     <div className="sm:col-span-2">
                       <div className="flex justify-between items-center mb-1.5">
-                        <label className="text-xs font-bold uppercase tracking-wider text-stone-600">
+                        <label className="text-xs font-bold uppercase tracking-wider text-amber-600">
                           Presentación a descontar *
                         </label>
                         {selectedPresStock !== null && (
@@ -346,7 +346,7 @@ export default function SalidasPage() {
                         required
                         value={presId}
                         onChange={e => setPresId(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       >
                         <option value="" disabled>Selecciona la presentación...</option>
                         {presentations.map(p => {
@@ -362,7 +362,7 @@ export default function SalidasPage() {
 
                     {/* Cantidad a retirar */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Cantidad (Piezas) *
                       </label>
                       <input
@@ -374,7 +374,7 @@ export default function SalidasPage() {
                         placeholder="Ej. 6"
                         value={presQuantity}
                         onChange={e => setPresQuantity(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       />
                       {selectedPresStock !== null && Number(presQuantity) > selectedPresStock && (
                         <p className="text-xs text-red-600 font-bold mt-1.5 flex items-center gap-1">
@@ -386,14 +386,14 @@ export default function SalidasPage() {
 
                     {/* Motivo de la salida */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Motivo de Salida *
                       </label>
                       <select
                         required
                         value={presReason}
                         onChange={e => setPresReason(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       >
                         <option value="VENTA">Venta a Cliente / Tienda</option>
                         <option value="MERMA">Merma / Frasco Dañado o Roto</option>
@@ -405,7 +405,7 @@ export default function SalidasPage() {
 
                     {/* Notas / Observaciones */}
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Notas o Referencia (Opcional)
                       </label>
                       <input
@@ -413,7 +413,7 @@ export default function SalidasPage() {
                         placeholder="Ej. Venta al mostrador, Ticket #312, Frasco despostillado en transporte..."
                         value={presNotes}
                         onChange={e => setPresNotes(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       />
                     </div>
                   </div>
@@ -435,14 +435,14 @@ export default function SalidasPage() {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-lg sm:text-xl font-black text-stone-900">
+                    <h2 className="text-lg sm:text-xl font-black text-amber-900">
                       Salida de Materia Prima / Insumos
                     </h2>
-                    <p className="text-xs sm:text-sm text-stone-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-amber-500 mt-0.5">
                       Descuenta envases vacíos, cubetas de miel a granel, quesos o extras.
                     </p>
                   </div>
-                  <span className="px-3 py-1 bg-stone-100 text-stone-700 border border-stone-200 rounded-full text-xs font-bold">
+                  <span className="px-3 py-1 bg-amber-100 text-amber-700 border border-amber-200 rounded-full text-xs font-bold">
                     Almacén General
                   </span>
                 </div>
@@ -464,11 +464,11 @@ export default function SalidasPage() {
                     {/* Material */}
                     <div className="sm:col-span-2">
                       <div className="flex justify-between items-center mb-1.5">
-                        <label className="text-xs font-bold uppercase tracking-wider text-stone-600">
+                        <label className="text-xs font-bold uppercase tracking-wider text-amber-600">
                           Material / Insumo *
                         </label>
                         {selectedWhItem && (
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-stone-100 text-stone-700 border border-stone-200">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 border border-amber-200">
                             Disponible: {selectedWhItem.currentStock} {selectedWhItem.unit}
                           </span>
                         )}
@@ -477,7 +477,7 @@ export default function SalidasPage() {
                         required
                         value={whItemId}
                         onChange={e => setWhItemId(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       >
                         <option value="" disabled>Selecciona un material...</option>
                         {warehouseItems.filter(i => i.isActive).map(item => (
@@ -490,14 +490,14 @@ export default function SalidasPage() {
 
                     {/* Formato */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Formato de Salida *
                       </label>
                       <select
                         required
                         value={whFormat}
                         onChange={e => setWhFormat(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       >
                         <option value="PIEZA">Piezas / Unidades</option>
                         <option value="KILO">Kilos sueltos</option>
@@ -508,7 +508,7 @@ export default function SalidasPage() {
 
                     {/* Cantidad */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Cantidad ({whFormat}s) *
                       </label>
                       <input
@@ -519,20 +519,20 @@ export default function SalidasPage() {
                         placeholder="Ej. 1"
                         value={whQuantity}
                         onChange={e => setWhQuantity(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       />
                     </div>
 
                     {/* Motivo */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Motivo *
                       </label>
                       <select
                         required
                         value={whReason}
                         onChange={e => setWhReason(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 font-semibold text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       >
                         <option value="VENTA_DIRECTA">Venta Directa</option>
                         <option value="MERMA">Merma / Roto / Dañado</option>
@@ -543,7 +543,7 @@ export default function SalidasPage() {
 
                     {/* Notas */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-600 mb-1.5">
                         Notas (Opcional)
                       </label>
                       <input
@@ -551,7 +551,7 @@ export default function SalidasPage() {
                         placeholder="Observaciones..."
                         value={whNotes}
                         onChange={e => setWhNotes(e.target.value)}
-                        className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-800 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b] transition-all"
+                        className="w-full bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800 focus:outline-none focus:ring-2 focus:ring-[#d97706] transition-all"
                       />
                     </div>
                   </div>
@@ -570,13 +570,13 @@ export default function SalidasPage() {
           </div>
 
           {/* Historial de Salidas */}
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_4px_25px_rgb(0,0,0,0.05)] border border-stone-200/80">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-100">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_4px_25px_rgb(0,0,0,0.05)] border border-amber-200/80">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-amber-100">
               <div>
-                <h3 className="text-lg font-black text-stone-900">
+                <h3 className="text-lg font-black text-amber-900">
                   Historial de Salidas Recientes
                 </h3>
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-amber-500 mt-0.5">
                   Últimos movimientos de baja y salidas confirmadas.
                 </p>
               </div>
@@ -586,16 +586,16 @@ export default function SalidasPage() {
             </div>
 
             {isLoading ? (
-              <div className="py-12 text-center text-stone-400 font-semibold text-sm">
+              <div className="py-12 text-center text-amber-400 font-semibold text-sm">
                 Cargando historial de salidas...
               </div>
             ) : salidasHistory.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-400 flex items-center justify-center mx-auto mb-3">
                   <PackageMinusIcon className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-bold text-stone-600">Aún no se han registrado salidas</p>
-                <p className="text-xs text-stone-400 mt-1">
+                <p className="text-sm font-bold text-amber-600">Aún no se han registrado salidas</p>
+                <p className="text-xs text-amber-400 mt-1">
                   Usa el formulario arriba para registrar la primera salida de producto o insumo.
                 </p>
               </div>
@@ -603,7 +603,7 @@ export default function SalidasPage() {
               <div className="overflow-x-auto -mx-6 sm:mx-0">
                 <table className="w-full text-left text-xs sm:text-sm">
                   <thead>
-                    <tr className="border-b border-stone-100 text-stone-400 uppercase tracking-wider text-[11px]">
+                    <tr className="border-b border-amber-100 text-amber-400 uppercase tracking-wider text-[11px]">
                       <th className="py-3 px-4 font-bold">Fecha</th>
                       <th className="py-3 px-4 font-bold">Artículo / Producto</th>
                       <th className="py-3 px-4 font-bold">Cantidad</th>
@@ -611,24 +611,24 @@ export default function SalidasPage() {
                       <th className="py-3 px-4 font-bold">Tipo</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 font-medium">
+                  <tbody className="divide-y divide-amber-100 font-medium">
                     {salidasHistory.map(item => (
-                      <tr key={item.id} className="hover:bg-stone-50/70 transition-colors">
-                        <td className="py-3.5 px-4 text-stone-500 text-xs whitespace-nowrap">
+                      <tr key={item.id} className="hover:bg-amber-50/70 transition-colors">
+                        <td className="py-3.5 px-4 text-amber-500 text-xs whitespace-nowrap">
                           {formatDate(item.movementDate)}
                         </td>
-                        <td className="py-3.5 px-4 font-bold text-stone-900">
+                        <td className="py-3.5 px-4 font-bold text-amber-900">
                           {item.name}
                         </td>
                         <td className="py-3.5 px-4 font-black text-red-700 whitespace-nowrap">
                           -{item.quantity} {item.itemType === 'PRESENTATION' ? 'pzas' : ''}
                         </td>
-                        <td className="py-3.5 px-4 text-stone-600">
+                        <td className="py-3.5 px-4 text-amber-600">
                           <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/60">
                             {item.referenceType || 'Salida'}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-stone-500 text-xs whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-amber-500 text-xs whitespace-nowrap">
                           {item.itemType === 'PRESENTATION' ? 'Terminado' : 'Almacén'}
                         </td>
                       </tr>

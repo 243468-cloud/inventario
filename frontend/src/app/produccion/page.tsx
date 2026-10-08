@@ -8,11 +8,11 @@ import GeofenceWrapper from '@/components/GeofenceWrapper';
 function StepCard({ number, title, desc }: { number: string; title: string; desc: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#2c4c3b] text-white text-sm font-black flex items-center justify-center shadow-md">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#d97706] text-white text-sm font-black flex items-center justify-center shadow-md">
         {number}
       </div>
       <div>
-        <p className="font-bold text-[#2c4c3b] text-sm">{title}</p>
+        <p className="font-bold text-[#d97706] text-sm">{title}</p>
         <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{desc}</p>
       </div>
     </div>
@@ -71,23 +71,23 @@ export default function Produccion() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pb-12 font-sans selection:bg-[#2c4c3b] selection:text-white">
+    <div className="min-h-screen bg-[#f8f9fa] pb-12 font-sans selection:bg-[#d97706] selection:text-white">
       <GeofenceWrapper>
         <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#e07a5f] to-[#e89a85] text-white shadow-lg shadow-[#e07a5f]/25 flex items-center justify-center flex-shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#ea580c] to-[#e89a85] text-white shadow-lg shadow-[#ea580c]/25 flex items-center justify-center flex-shrink-0">
             <PackageOpenIcon />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-[#2c4c3b] tracking-tight">Captura de Producción</h2>
+            <h2 className="text-3xl font-black text-[#d97706] tracking-tight">Captura de Producción</h2>
             <p className="text-gray-500 text-sm mt-0.5">Registra un lote de envasado de miel</p>
           </div>
         </div>
 
       {/* How it works */}
-      <div className="bg-[#f1f6f3]/80 backdrop-blur border border-[#2c4c3b]/10 rounded-2xl p-5 mb-6">
-        <p className="text-xs font-black text-[#2c4c3b]/60 uppercase tracking-widest mb-4">¿Para qué sirve esta pantalla?</p>
+      <div className="bg-[#f1f6f3]/80 backdrop-blur border border-[#d97706]/10 rounded-2xl p-5 mb-6">
+        <p className="text-xs font-black text-[#d97706]/60 uppercase tracking-widest mb-4">¿Para qué sirve esta pantalla?</p>
         <div className="space-y-4">
           <StepCard
             number="1"
@@ -109,7 +109,7 @@ export default function Produccion() {
 
       {/* Form card */}
       <div className="relative bg-white/70 backdrop-blur-2xl p-7 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.05)] border border-white/50">
-        <div className="absolute -inset-1 bg-gradient-to-r from-[#2c4c3b]/8 to-[#e07a5f]/8 rounded-[1.8rem] blur-xl -z-10" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-[#d97706]/8 to-[#ea580c]/8 rounded-[1.8rem] blur-xl -z-10" />
 
         {message && (
           <div className={`flex items-center gap-3 p-4 rounded-2xl mb-6 font-bold text-sm animate-in zoom-in-95 duration-300
@@ -140,20 +140,20 @@ export default function Produccion() {
                       onClick={() => setSelectedId(String(p.id))}
                       className={`relative flex flex-col items-start gap-1 p-4 rounded-2xl border-2 text-left transition-all duration-200 group
                         ${ active
-                          ? 'border-[#2c4c3b] bg-[#2c4c3b] text-white shadow-lg shadow-[#2c4c3b]/20 scale-[1.02]'
-                          : 'border-gray-200 bg-white/60 text-[#2c4c3b] hover:border-[#2c4c3b]/40 hover:bg-white/80 hover:scale-[1.01]'
+                          ? 'border-[#d97706] bg-[#d97706] text-white shadow-lg shadow-[#d97706]/20 scale-[1.02]'
+                          : 'border-gray-200 bg-white/60 text-[#d97706] hover:border-[#d97706]/40 hover:bg-white/80 hover:scale-[1.01]'
                         }`}
                     >
                       <HexagonIcon className="w-5 h-5 mb-1" />
                       <span className="font-bold text-sm leading-tight">{p.name}</span>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        active ? 'bg-white/20 text-white' : 'bg-[#2c4c3b]/10 text-[#2c4c3b]'
+                        active ? 'bg-white/20 text-white' : 'bg-[#d97706]/10 text-[#d97706]'
                       }`}>
                         {p.weightGrams}g
                       </span>
                       {active && (
                         <div className="absolute top-2.5 right-2.5 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-[#2c4c3b] rounded-full" />
+                          <div className="w-2 h-2 bg-[#d97706] rounded-full" />
                         </div>
                       )}
                     </button>
@@ -176,7 +176,7 @@ export default function Produccion() {
               onChange={e => setQuantity(e.target.value)}
               type="number"
               min="1"
-              className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 text-3xl text-center focus:outline-none focus:ring-2 focus:ring-[#e07a5f]/30 focus:border-[#e07a5f] transition-all font-black text-[#e07a5f] placeholder-gray-300"
+              className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3.5 text-3xl text-center focus:outline-none focus:ring-2 focus:ring-[#ea580c]/30 focus:border-[#ea580c] transition-all font-black text-[#ea580c] placeholder-gray-300"
               placeholder="0"
             />
           </div>
@@ -195,7 +195,7 @@ export default function Produccion() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="relative overflow-hidden w-full group bg-gradient-to-r from-[#e07a5f] to-[#d46d53] text-white font-bold text-base py-4 rounded-xl hover:-translate-y-0.5 transition-all active:scale-95 shadow-[0_8px_20px_-5px_rgba(224,122,95,0.4)] disabled:opacity-70"
+            className="relative overflow-hidden w-full group bg-gradient-to-r from-[#ea580c] to-[#d46d53] text-white font-bold text-base py-4 rounded-xl hover:-translate-y-0.5 transition-all active:scale-95 shadow-[0_8px_20px_-5px_rgba(224,122,95,0.4)] disabled:opacity-70"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             <span className="relative flex items-center justify-center gap-2">

@@ -156,7 +156,7 @@ export default function Presentaciones() {
     <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
       <GeofenceWrapper>
         <div className="mb-8">
-          <h2 className="text-4xl font-black text-[#2c4c3b] tracking-tight mb-2">Presentaciones y Recetas</h2>
+          <h2 className="text-4xl font-black text-[#d97706] tracking-tight mb-2">Presentaciones y Recetas</h2>
           <p className="text-gray-500 font-medium">Selecciona una presentación existente o crea una nueva definiendo su envase y contenido.</p>
         </div>
 
@@ -164,9 +164,9 @@ export default function Presentaciones() {
           
           {/* Selection Dropdown */}
           <div className="mb-8">
-            <label className="block text-sm font-bold text-[#2c4c3b] mb-2">Seleccionar Presentación</label>
+            <label className="block text-sm font-bold text-[#d97706] mb-2">Seleccionar Presentación</label>
             <select 
-              className="w-full bg-white/60 border border-[#2c4c3b]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#e07a5f] font-medium text-gray-800"
+              className="w-full bg-white/60 border border-[#d97706]/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ea580c] font-medium text-gray-800"
               value={selectedPresId || ''}
               onChange={(e) => handleSelect(e.target.value === 'NEW' ? 'NEW' : Number(e.target.value))}
             >
@@ -174,7 +174,7 @@ export default function Presentaciones() {
               {presentaciones.map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.weightGrams}g)</option>
               ))}
-              <option value="NEW" className="font-bold text-[#e07a5f]">+ Crear Nueva (Otra)</option>
+              <option value="NEW" className="font-bold text-[#ea580c]">+ Crear Nueva (Otra)</option>
             </select>
           </div>
 
@@ -186,7 +186,7 @@ export default function Presentaciones() {
 
           {selectedPresId && (
             <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in">
-              <h3 className="text-lg font-extrabold mb-4 text-[#2c4c3b] border-b pb-2">
+              <h3 className="text-lg font-extrabold mb-4 text-[#d97706] border-b pb-2">
                 {selectedPresId === 'NEW' ? 'Nueva Presentación' : 'Editar Presentación'}
               </h3>
               
@@ -198,7 +198,7 @@ export default function Presentaciones() {
                     pattern="^[A-Za-z0-9ñÑáéíóúÁÉÍÓÚ\s.,_-]{2,100}$"
                     title="Solo letras, números, espacios y caracteres básicos de puntuación"
                     maxLength={100}
-                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#e07a5f]/40 focus:border-[#e07a5f] font-medium text-gray-800"
+                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/40 focus:border-[#ea580c] font-medium text-gray-800"
                     placeholder="Ej. Frasco 500g Limón"
                     disabled={selectedPresId !== 'NEW'} // Disable editing name for now if no PUT endpoint
                   />
@@ -207,7 +207,7 @@ export default function Presentaciones() {
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Min. Stock (Alertas)</label>
                   <input
                     required value={minStock} onChange={e => setMinStock(e.target.value)} type="number" min="0"
-                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b]/30 focus:border-[#2c4c3b] font-medium text-gray-800"
+                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#d97706]/30 focus:border-[#d97706] font-medium text-gray-800"
                     placeholder="100"
                   />
                 </div>
@@ -218,7 +218,7 @@ export default function Presentaciones() {
                   <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Peso de Miel (g)</label>
                   <input
                     required value={weight} onChange={e => setWeight(e.target.value)} type="number" min="1"
-                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#2c4c3b]/30 focus:border-[#2c4c3b] font-medium text-gray-800"
+                    className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#d97706]/30 focus:border-[#d97706] font-medium text-gray-800"
                     placeholder="500"
                     disabled={selectedPresId !== 'NEW'}
                   />
@@ -227,14 +227,14 @@ export default function Presentaciones() {
                   <>
                     <div>
                       <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Envase</label>
-                      <select required value={envaseId} onChange={e => setEnvaseId(e.target.value)} className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#e07a5f]/40 font-medium text-gray-800">
+                      <select required value={envaseId} onChange={e => setEnvaseId(e.target.value)} className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/40 font-medium text-gray-800">
                         <option value="" disabled>Selecciona...</option>
                         {envases.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Tipo de Miel</label>
-                      <select required value={mielId} onChange={e => setMielId(e.target.value)} className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#e07a5f]/40 font-medium text-gray-800">
+                      <select required value={mielId} onChange={e => setMielId(e.target.value)} className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/40 font-medium text-gray-800">
                         <option value="" disabled>Selecciona...</option>
                         {mieles.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                       </select>
@@ -245,7 +245,7 @@ export default function Presentaciones() {
 
               <button
                 type="submit" disabled={isSubmitting}
-                className="w-full py-3 mt-4 bg-gradient-to-r from-[#2c4c3b] to-[#3a634d] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                className="w-full py-3 mt-4 bg-gradient-to-r from-[#d97706] to-[#f59e0b] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? 'Guardando...' : 'Guardar'}
               </button>
@@ -256,7 +256,7 @@ export default function Presentaciones() {
         {/* History */}
         <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/40 overflow-hidden">
           <div className="px-8 py-5 border-b border-gray-100/60 flex items-center justify-between">
-            <h3 className="text-xl font-extrabold text-[#2c4c3b]">Historial de Movimientos</h3>
+            <h3 className="text-xl font-extrabold text-[#d97706]">Historial de Movimientos</h3>
             <span className="text-xs text-gray-400 font-medium">Últimos 50 registros</span>
           </div>
 
@@ -272,7 +272,7 @@ export default function Presentaciones() {
                   <div className="flex items-center gap-4">
                     <MovementBadge type={item.movementType} />
                     <div>
-                      <p className="font-bold text-[#2c4c3b] text-sm group-hover:text-[#e07a5f] transition-colors">
+                      <p className="font-bold text-[#d97706] text-sm group-hover:text-[#ea580c] transition-colors">
                         {item.presentationName}
                       </p>
                       <p className="text-xs text-gray-400 mt-0.5">

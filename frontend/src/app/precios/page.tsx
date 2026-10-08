@@ -79,10 +79,10 @@ export default function CostosYPrecios() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-[#1f3d2e] tracking-tight">
+          <h2 className="text-3xl font-black text-[#92400e] tracking-tight">
             Costos y Precios Sugeridos
           </h2>
-          <p className="text-[#1f3d2e]/60 font-medium text-base">
+          <p className="text-[#92400e]/60 font-medium text-base">
             Administra el costo de tu materia prima y calcula precios de venta recomendados.
           </p>
         </div>
@@ -114,14 +114,14 @@ export default function CostosYPrecios() {
               step="0.01"
               value={editingBulkCost}
               onChange={(e) => setEditingBulkCost(e.target.value)}
-              className="w-32 bg-white border border-gray-200 rounded-xl py-3 pl-8 pr-4 text-xl font-black text-[#1f3d2e] focus:outline-none focus:border-[#c96f4a] focus:ring-2 focus:ring-[#c96f4a]/20"
+              className="w-32 bg-white border border-gray-200 rounded-xl py-3 pl-8 pr-4 text-xl font-black text-[#92400e] focus:outline-none focus:border-[#d97706] focus:ring-2 focus:ring-[#d97706]/20"
             />
           </div>
           <span className="font-bold text-gray-500">/ kg</span>
           <button
             onClick={handleSaveBulkCost}
             disabled={isSaving || Number(editingBulkCost) === bulkCost}
-            className="ml-2 px-6 py-3 bg-[#1f3d2e] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-2 px-6 py-3 bg-[#92400e] text-white font-bold rounded-xl hover:-translate-y-0.5 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Actualizar
           </button>
@@ -131,7 +131,7 @@ export default function CostosYPrecios() {
       {/* Presentations Pricing Table */}
       <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-sm border border-white/60 overflow-hidden">
         <div className="px-8 py-5 border-b border-gray-100/60 bg-white/40">
-          <h3 className="text-lg font-extrabold text-[#1f3d2e]">Análisis de Precios por Presentación</h3>
+          <h3 className="text-lg font-extrabold text-[#92400e]">Análisis de Precios por Presentación</h3>
         </div>
         
         <div className="overflow-x-auto">
@@ -141,7 +141,7 @@ export default function CostosYPrecios() {
                 <th className="p-5 font-bold">Presentación</th>
                 <th className="p-5 font-bold">Costo Miel</th>
                 <th className="p-5 font-bold">Costo Envase</th>
-                <th className="p-5 font-bold text-[#1f3d2e]">Costo Total</th>
+                <th className="p-5 font-bold text-[#92400e]">Costo Total</th>
                 <th className="p-5 font-bold text-emerald-700 bg-emerald-50/30">Sugerido 30%</th>
                 <th className="p-5 font-bold text-blue-700 bg-blue-50/30">Sugerido 40%</th>
                 <th className="p-5 font-bold text-purple-700 bg-purple-50/30">Sugerido 50%</th>
@@ -167,7 +167,7 @@ export default function CostosYPrecios() {
                   <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
-                        <p className="font-bold text-[#2c4c3b]">{p.name}</p>
+                        <p className="font-bold text-[#d97706]">{p.name}</p>
                         <p className="text-xs text-gray-500">{p.weightGrams}g</p>
                       </div>
                     </td>
@@ -186,12 +186,12 @@ export default function CostosYPrecios() {
                               const val = Number(e.target.value);
                               if (val !== containerCost) handleUpdateContainerCost(p.id, val);
                             }}
-                            className="w-full bg-white border border-gray-200 rounded-lg py-1.5 pl-7 pr-2 text-sm font-bold text-[#1f3d2e] focus:outline-none focus:border-[#c96f4a]"
+                            className="w-full bg-white border border-gray-200 rounded-lg py-1.5 pl-7 pr-2 text-sm font-bold text-[#92400e] focus:outline-none focus:border-[#d97706]"
                           />
                         </div>
                       </td>
                       <td className="p-5">
-                        <span className="inline-block px-3 py-1 bg-gray-100 text-[#1f3d2e] font-black rounded-lg">
+                        <span className="inline-block px-3 py-1 bg-gray-100 text-[#92400e] font-black rounded-lg">
                           ${totalCost.toFixed(2)}
                         </span>
                       </td>

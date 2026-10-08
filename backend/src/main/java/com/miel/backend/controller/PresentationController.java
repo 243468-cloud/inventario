@@ -52,13 +52,37 @@ public class PresentationController {
                 if (update.getName() != null) {
                     presentation.setName(update.getName());
                 }
+                if (update.getWeightGrams() != null) {
+                    presentation.setWeightGrams(update.getWeightGrams());
+                }
                 if (update.getMinStock() != null) {
                     presentation.setMinStock(update.getMinStock());
                 }
-                // we can update more fields if needed
                 return ResponseEntity.ok(presentationRepository.save(presentation));
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    /** Actualizar el stock actual (frascos llenos) forzosamente */
+    @PutMapping("/{id}/stock")
+    public ResponseEntity<Map<String, Object>> updateStock(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> body) {
+        int currentStock = body.getOrDefault("current_stock", 0);
+        PresentationStock stock = presentationStockRepository.findById(id)
+            .orElseGet(() -> {
+                PresentationStock s = new PresentationStock();
+                s.setPresentationId(id);
+                s.setCurrentStock(0);
+                s.setEmptyStock(0);
+                return s;
+            });
+        stock.setCurrentStock(currentStock);
+        presentationStockRepository.save(stock);
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("presentation_id", id);
+        result.put("current_stock", currentStock);
+        return ResponseEntity.ok(result);
     }
 
     /** Obtener el stock de envases vacíos de una presentación */

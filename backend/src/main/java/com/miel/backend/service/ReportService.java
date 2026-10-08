@@ -201,6 +201,43 @@ public class ReportService {
                 sheetAlmacen.autoSizeColumn(c);
             }
 
+            // ── HOJA 1b: Presentaciones Envasadas ──
+            Sheet sheetPres = workbook.createSheet("Presentaciones Envasadas");
+            int rPres = 0;
+            Row hRowPres = sheetPres.createRow(rPres++);
+            String[] colsPres = {"ID", "Presentación", "Peso (g)", "Stock", "Precio Público (Venta)", "Valor Total ($)"};
+            for (int c = 0; c < colsPres.length; c++) {
+                Cell cell = hRowPres.createCell(c);
+                cell.setCellValue(colsPres[c]);
+                cell.setCellStyle(hStyleAlm);
+            }
+            
+            List<com.miel.backend.model.RealTimeInventoryDTO> inventoryList = inventoryService.getRealTimeInventory();
+            double totalPresValue = 0;
+            for (com.miel.backend.model.RealTimeInventoryDTO rowDto : inventoryList) {
+                Row row = sheetPres.createRow(rPres++);
+                row.createCell(0).setCellValue(rowDto.getPresentation_id());
+                row.createCell(1).setCellValue(rowDto.getPresentation_name());
+                row.createCell(2).setCellValue(rowDto.getWeight_grams() != null ? rowDto.getWeight_grams().doubleValue() : 0.0);
+                row.createCell(3).setCellValue(rowDto.getStock_actual() != null ? rowDto.getStock_actual().doubleValue() : 0.0);
+                row.createCell(4).setCellValue(rowDto.getPrecio_venta_vigente() != null ? rowDto.getPrecio_venta_vigente().doubleValue() : 0.0);
+                double vt = rowDto.getValor_total_stock() != null ? rowDto.getValor_total_stock().doubleValue() : 0.0;
+                row.createCell(5).setCellValue(vt);
+                totalPresValue += vt;
+            }
+            
+            Row totalRowPres = sheetPres.createRow(rPres++);
+            Cell cTPresLabel = totalRowPres.createCell(1);
+            cTPresLabel.setCellValue("TOTAL VALOR PRESENTACIONES:");
+            cTPresLabel.setCellStyle(totStyle);
+            Cell cTPresVal = totalRowPres.createCell(5);
+            cTPresVal.setCellValue(totalPresValue);
+            cTPresVal.setCellStyle(totStyle);
+            
+            for (int c = 0; c < colsPres.length; c++) {
+                sheetPres.autoSizeColumn(c);
+            }
+
             // ── HOJA 2: Resumen por Categoría (datos reales de inventory_items) ──
             Sheet sheet = workbook.createSheet("Resumen por Categoría");
             String[] columns = {"Categoría", "Productos", "Piezas en Stock", "Valor Total ($)", "Sin Stock", "Bajo Stock"};

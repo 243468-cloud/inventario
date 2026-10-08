@@ -54,18 +54,29 @@ export default function NavBar({ role }: NavBarProps) {
               <span>{label}</span>
             </Link>
           ))}
+          <button
+            onClick={() => {
+              document.cookie = 'auth_token=; Max-Age=0; path=/; SameSite=Lax';
+              document.cookie = 'user_role=; Max-Age=0; path=/; SameSite=Lax';
+              try { localStorage.clear(); } catch {}
+              window.location.replace('/login');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 transition-colors ml-2"
+          >
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
 
         {/* Hamburger button - mobile only */}
         <button
           id="nav-hamburger"
           onClick={() => setOpen(!open)}
-          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl bg-[#2c4c3b]/10 hover:bg-[#2c4c3b]/20 transition-colors"
+          className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl bg-stone-100 hover:bg-stone-200 transition-colors"
           aria-label="Abrir menú"
         >
-          <span className={`block w-5 h-0.5 bg-[#2c4c3b] transition-all duration-300 ${open ? 'rotate-45 translate-y-1.5' : ''}`} />
-          <span className={`block w-5 h-0.5 bg-[#2c4c3b] my-1 transition-all duration-300 ${open ? 'opacity-0' : ''}`} />
-          <span className={`block w-5 h-0.5 bg-[#2c4c3b] transition-all duration-300 ${open ? '-rotate-45 -translate-y-1.5' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-stone-900 transition-all duration-300 ${open ? 'rotate-45 translate-y-1.5' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-stone-900 my-1 transition-all duration-300 ${open ? 'opacity-0' : ''}`} />
+          <span className={`block w-5 h-0.5 bg-stone-900 transition-all duration-300 ${open ? '-rotate-45 -translate-y-1.5' : ''}`} />
         </button>
       </div>
 
@@ -79,14 +90,25 @@ export default function NavBar({ role }: NavBarProps) {
               onClick={() => setOpen(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
                 ${isActive(href)
-                  ? 'bg-[#2c4c3b] text-white shadow-md'
-                  : 'text-[#2c4c3b]/80 hover:bg-[#2c4c3b]/10 hover:text-[#2c4c3b]'
+                  ? 'bg-stone-900 text-white shadow-md'
+                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                 }`}
             >
               {icon}
               <span>{label}</span>
             </Link>
           ))}
+          <button
+            onClick={() => {
+              document.cookie = 'auth_token=; Max-Age=0; path=/; SameSite=Lax';
+              document.cookie = 'user_role=; Max-Age=0; path=/; SameSite=Lax';
+              try { localStorage.clear(); } catch {}
+              window.location.replace('/login');
+            }}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all duration-200 text-left"
+          >
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </div>
     </nav>

@@ -89,6 +89,34 @@ public class ReportService {
         }
     }
 
+    private static class ItemReportData {
+        double stock;
+        double cost;
+        double minStock;
+        String unit;
+        
+        public ItemReportData(com.miel.backend.model.InventoryItem item, String formattedUnit) {
+            this.stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
+            this.cost = item.getCostPerUnit() != null ? item.getCostPerUnit().doubleValue() : 0.0;
+            this.minStock = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
+            this.unit = formattedUnit;
+            
+            if (item.getName() != null) {
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(?i)(caja|paq) c/(\\d+)\\s*pza");
+                java.util.regex.Matcher matcher = pattern.matcher(item.getName());
+                if (matcher.find()) {
+                    this.unit = matcher.group(1).toLowerCase().startsWith("caja") ? "Cajas" : "Paquetes";
+                    double pieces = Double.parseDouble(matcher.group(2));
+                    if (pieces > 0) {
+                        this.stock = this.stock / pieces;
+                        this.cost = this.cost * pieces;
+                        this.minStock = this.minStock / pieces;
+                    }
+                }
+            }
+        }
+    }
+
     public ByteArrayInputStream exportInventoryToExcel() throws IOException {
         List<com.miel.backend.model.InventoryItem> rawItems = inventoryItemRepository.findAll();
 
@@ -140,21 +168,19 @@ public class ReportService {
                 }
 
                 Row row = sheetAlmacen.createRow(rAlm++);
-                double stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
-                double cost = item.getCostPerUnit() != null ? item.getCostPerUnit().doubleValue() : 0.0;
-                double valTotal = stock * cost;
+                ItemReportData data = new ItemReportData(item, formatUnit(item.getUnit()));
+                double valTotal = data.stock * data.cost;
                 totalAlmacenValue += valTotal;
-                double minStk = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
-                boolean isLow = item.getIsActive() != null && item.getIsActive() && stock <= minStk && minStk > 0;
+                boolean isLow = item.getIsActive() != null && item.getIsActive() && data.stock <= data.minStock && data.minStock > 0;
 
                 row.createCell(0).setCellValue(item.getId());
                 row.createCell(1).setCellValue(item.getName());
                 row.createCell(2).setCellValue(formatCategory(item.getCategory()));
-                row.createCell(3).setCellValue(formatUnit(item.getUnit()));
-                row.createCell(4).setCellValue(stock);
-                row.createCell(5).setCellValue(cost);
+                row.createCell(3).setCellValue(data.unit);
+                row.createCell(4).setCellValue(data.stock);
+                row.createCell(5).setCellValue(data.cost);
                 row.createCell(6).setCellValue(valTotal);
-                row.createCell(7).setCellValue(minStk);
+                row.createCell(7).setCellValue(data.minStock);
                 row.createCell(8).setCellValue(isLow ? "BAJO STOCK" : "NORMAL");
             }
 
@@ -187,15 +213,13 @@ public class ReportService {
 
             Map<String, double[]> byCat = new java.util.LinkedHashMap<>();
             for (com.miel.backend.model.InventoryItem item : sortedItems) {
-                double stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
-                double cost = item.getCostPerUnit() != null ? item.getCostPerUnit().doubleValue() : 0.0;
-                double minStk = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
+                ItemReportData data = new ItemReportData(item, formatUnit(item.getUnit()));
                 double[] acc = byCat.computeIfAbsent(formatCategory(item.getCategory()), k -> new double[5]);
                 acc[0] += 1;
-                acc[1] += stock;
-                acc[2] += stock * cost;
-                if (stock <= 0) acc[3] += 1;
-                if (minStk > 0 && stock > 0 && stock <= minStk) acc[4] += 1;
+                acc[1] += data.stock;
+                acc[2] += data.stock * data.cost;
+                if (data.stock <= 0) acc[3] += 1;
+                if (data.minStock > 0 && data.stock > 0 && data.stock <= data.minStock) acc[4] += 1;
             }
 
             int rowIdx = 1;
@@ -235,17 +259,16 @@ public class ReportService {
             int r2 = 1;
             // Primero todos los envases, luego cualquier otro producto agotado o bajo stock
             for (com.miel.backend.model.InventoryItem item : sortedItems) {
-                double stock = item.getCurrentStock() != null ? item.getCurrentStock().doubleValue() : 0.0;
-                double minStk = item.getMinStock() != null ? item.getMinStock().doubleValue() : 0.0;
+                ItemReportData data = new ItemReportData(item, formatUnit(item.getUnit()));
                 boolean isContainer = "CONTAINER".equals(item.getCategory());
-                String estado = stock <= 0 ? "AGOTADO" : (minStk > 0 && stock <= minStk ? "BAJO STOCK" : "OK");
+                String estado = data.stock <= 0 ? "AGOTADO" : (data.minStock > 0 && data.stock <= data.minStock ? "BAJO STOCK" : "OK");
                 if (!isContainer && "OK".equals(estado)) continue;
 
                 Row exRow = sheet2.createRow(r2++);
                 exRow.createCell(0).setCellValue(item.getName());
                 exRow.createCell(1).setCellValue(formatCategory(item.getCategory()));
-                exRow.createCell(2).setCellValue(stock);
-                exRow.createCell(3).setCellValue(minStk);
+                exRow.createCell(2).setCellValue(data.stock);
+                exRow.createCell(3).setCellValue(data.minStock);
                 exRow.createCell(4).setCellValue(estado);
             }
             if (r2 == 1) {
@@ -340,12 +363,13 @@ public class ReportService {
 
             com.lowagie.text.Font rFont = FontFactory.getFont(FontFactory.HELVETICA, 8);
             for (com.miel.backend.model.InventoryItem it : rawItems) {
+                ItemReportData data = new ItemReportData(it, formatUnit(it.getUnit()));
                 tableAlm.addCell(new Phrase(it.getName(), rFont));
                 tableAlm.addCell(new Phrase(formatCategory(it.getCategory()), rFont));
-                tableAlm.addCell(new Phrase(formatUnit(it.getUnit()), rFont));
-                tableAlm.addCell(new Phrase(String.valueOf(it.getCurrentStock()), rFont));
-                tableAlm.addCell(new Phrase("$" + it.getCostPerUnit(), rFont));
-                boolean low = it.getIsActive() && it.getCurrentStock().compareTo(it.getMinStock()) <= 0;
+                tableAlm.addCell(new Phrase(data.unit, rFont));
+                tableAlm.addCell(new Phrase(String.format("%.2f", data.stock), rFont));
+                tableAlm.addCell(new Phrase(String.format("$%.2f", data.cost), rFont));
+                boolean low = it.getIsActive() && data.stock <= data.minStock && data.minStock > 0;
                 tableAlm.addCell(new Phrase(low ? "BAJO" : "OK", rFont));
             }
             document.add(tableAlm);

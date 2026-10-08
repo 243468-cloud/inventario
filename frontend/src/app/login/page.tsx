@@ -15,12 +15,14 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const router = useRouter();
 
   const reset = (newMode: Mode) => {
     setMode(newMode);
     setError('');
     setSuccess('');
+    setLoadingMessage('');
     setUsername('');
     setPassword('');
     setConfirmPassword('');
@@ -29,25 +31,62 @@ export default function Login() {
   const performLogin = async () => {
     setIsLoading(true);
     setError('');
+    setLoadingMessage('');
+
+    // Si Render tarda en despertar (cold start), avisar al usuario
+    const wakeUpTimer = setTimeout(() => {
+      setLoadingMessage('Conectando con el servidor en la nube (iniciando instancia)...');
+    }, 3500);
+
+    const controller = new AbortController();
+    const abortTimeout = setTimeout(() => controller.abort(), 60000);
+
     try {
       const res = await apiFetch('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal
       });
+
+      clearTimeout(wakeUpTimer);
+      clearTimeout(abortTimeout);
+
       if (res.ok) {
         const data = await res.json();
-        document.cookie = `auth_token=${data.accessToken}; path=/; max-age=86400; SameSite=Strict`;
-        document.cookie = `user_role=${data.role}; path=/; max-age=86400; SameSite=Strict`;
-        // Usamos window.location.href en lugar de router.push para forzar 
-        // a Next.js a recargar el layout.tsx desde el servidor y mostrar el NavBar.
-        window.location.href = '/';
+        const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        const secureFlag = isHttps ? '; Secure' : '';
+
+        // SameSite=Lax y Secure son obligatorios para que iOS Safari envíe cookies en redirecciones
+        document.cookie = `auth_token=${data.accessToken}; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
+        document.cookie = `user_role=${data.role}; path=/; max-age=86400; SameSite=Lax${secureFlag}`;
+
+        // Respaldo en localStorage
+        try {
+          localStorage.setItem('auth_token', data.accessToken);
+          localStorage.setItem('user_role', data.role);
+        } catch {}
+
+        setLoadingMessage('¡Acceso concedido! Entrando...');
+
+        // Usamos replace con un pequeño delay para que Safari registre la cookie en disco antes de la navegación
+        setTimeout(() => {
+          window.location.replace('/');
+        }, 120);
       } else {
         setError('Usuario o contraseña incorrectos.');
         setIsLoading(false);
+        setLoadingMessage('');
       }
-    } catch {
-      setError('Error al conectar con el servidor.');
+    } catch (err: any) {
+      clearTimeout(wakeUpTimer);
+      clearTimeout(abortTimeout);
+      if (err?.name === 'AbortError') {
+        setError('El servidor tardó en responder. Por favor reintenta ahora que ya está activo.');
+      } else {
+        setError('Error al conectar con el servidor.');
+      }
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -60,6 +99,7 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setLoadingMessage('');
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden.');
       return;
@@ -69,11 +109,24 @@ export default function Login() {
       return;
     }
     setIsLoading(true);
+
+    const wakeUpTimer = setTimeout(() => {
+      setLoadingMessage('Conectando con el servidor en la nube...');
+    }, 3500);
+
+    const controller = new AbortController();
+    const abortTimeout = setTimeout(() => controller.abort(), 60000);
+
     try {
       const res = await apiFetch('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal
       });
+
+      clearTimeout(wakeUpTimer);
+      clearTimeout(abortTimeout);
+
       const data = await res.json();
       if (res.ok) {
         setSuccess('¡Cuenta creada! Ingresando...');
@@ -81,10 +134,18 @@ export default function Login() {
       } else {
         setError(data.message || 'Error al registrar usuario.');
         setIsLoading(false);
+        setLoadingMessage('');
       }
-    } catch {
-      setError('Error al conectar con el servidor.');
+    } catch (err: any) {
+      clearTimeout(wakeUpTimer);
+      clearTimeout(abortTimeout);
+      if (err?.name === 'AbortError') {
+        setError('El servidor tardó en responder. Por favor reintenta.');
+      } else {
+        setError('Error al conectar con el servidor.');
+      }
       setIsLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -240,6 +301,11 @@ export default function Login() {
                 ) : mode === 'login' ? 'Ingresar al Sistema' : 'Crear mi Cuenta'}
               </span>
             </button>
+            {loadingMessage && (
+              <div className="mt-3 p-3 bg-amber-50/90 border border-amber-200/80 rounded-xl text-xs font-semibold text-amber-800 text-center animate-pulse">
+                {loadingMessage}
+              </div>
+            )}
           </div>
         </form>
 

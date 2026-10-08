@@ -3,7 +3,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 export const getAuthToken = (): string => {
   if (typeof document === 'undefined') return '';
   const match = document.cookie.match(new RegExp('(^| )auth_token=([^;]+)'));
-  return match ? match[2] : '';
+  if (match) return match[2];
+  try {
+    return localStorage.getItem('auth_token') || '';
+  } catch {
+    return '';
+  }
 };
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}): Promise<Response> => {
@@ -20,10 +25,17 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     headers,
   });
 
-  // Si la sesión expiró (401), redirigir al login sin exponer detalles
+  // Si la sesión expiró (401), limpiar y redirigir al login
   if (response.status === 401 && typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
-    document.cookie = 'auth_token=; Max-Age=0; path=/';
-    window.location.href = '/login';
+    const isHttps = window.location.protocol === 'https:';
+    const secureFlag = isHttps ? '; Secure' : '';
+    document.cookie = `auth_token=; Max-Age=0; path=/; SameSite=Lax${secureFlag}`;
+    document.cookie = `user_role=; Max-Age=0; path=/; SameSite=Lax${secureFlag}`;
+    try {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_role');
+    } catch {}
+    window.location.replace('/login');
   }
 
   return response;

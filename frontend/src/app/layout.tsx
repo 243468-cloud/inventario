@@ -20,6 +20,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Miel de las Abejas de la Selva Maya',
   description: 'Sistema de Gestión de Inventario Premium',
+  manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

@@ -29,7 +29,7 @@ const UNIT_LABELS: Record<string, string> = {
   GRAM: 'Gramos',
 };
 
-const defaultForm = { name: '', category: 'CONTAINER', unit: 'PIECE', minStock: '0', costPerUnit: '0' };
+const defaultForm = { name: '', category: 'CONTAINER', unit: 'PIECE', minStock: '0', costPerUnit: '0', currentStock: '0' };
 
 export default function Almacen() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -69,7 +69,7 @@ export default function Almacen() {
     setEntryError('');
     try {
       let baseQty = Number(quantity);
-      if (formatType === 'CUBETA') baseQty = baseQty * 24.5;
+      if (formatType === 'CUBETA') baseQty = baseQty * 27;
       if (formatType === 'GALON') baseQty = baseQty * 25;
 
       const endpoint = movementMode === 'ENTRADA' ? '/almacen/entradas' : '/almacen/salidas';
@@ -130,6 +130,7 @@ export default function Almacen() {
       unit: item.unit,
       minStock: String(item.minStock),
       costPerUnit: String(item.costPerUnit ?? 0),
+      currentStock: String(item.currentStock ?? 0),
     });
     setModalSuccess(''); setModalError('');
     setShowModal(true);
@@ -146,7 +147,7 @@ export default function Almacen() {
         unit: form.unit,
         minStock: Number(form.minStock),
         costPerUnit: Number(form.costPerUnit),
-        currentStock: editingItem ? editingItem.currentStock : 0,
+        currentStock: Number(form.currentStock),
         isActive: editingItem ? editingItem.isActive : true,
       };
 
@@ -447,6 +448,16 @@ export default function Almacen() {
                       placeholder="0.00"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Stock Físico (Editar sin movimiento)</label>
+                  <input
+                    required value={form.currentStock} onChange={e => setForm(f => ({ ...f, currentStock: e.target.value }))} type="number" min="0" step="any"
+                    className="w-full bg-amber-50/50 border border-amber-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#d97706]/30 font-bold text-amber-900"
+                    placeholder="0"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Cambiar este valor NO genera reporte en movimientos.</p>
                 </div>
 
                 <div className="flex gap-3 pt-2">

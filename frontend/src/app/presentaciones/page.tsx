@@ -25,6 +25,11 @@ interface InventoryItem {
   isActive: boolean;
 }
 
+interface RealTimeData {
+  presentation_id: number;
+  stock_actual: number;
+}
+
 function formatDate(iso: string) {
   if (!iso) return '—';
   const d = new Date(iso);
@@ -49,6 +54,7 @@ export default function Presentaciones() {
   const [presentaciones, setPresentaciones] = useState<Presentacion[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [realTimeStock, setRealTimeStock] = useState<RealTimeData[]>([]);
   
   const [selectedPresId, setSelectedPresId] = useState<number | 'NEW' | null>(null);
 
@@ -56,6 +62,7 @@ export default function Presentaciones() {
   const [name, setName] = useState('');
   const [weight, setWeight] = useState('');
   const [minStock, setMinStock] = useState('');
+  const [currentStock, setCurrentStock] = useState('');
   const [envaseId, setEnvaseId] = useState('');
   const [mielId, setMielId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,14 +70,16 @@ export default function Presentaciones() {
 
   async function fetchData() {
     try {
-      const [presRes, histRes, invRes] = await Promise.all([
+      const [presRes, histRes, invRes, rtRes] = await Promise.all([
         apiFetch('/presentations'),
         apiFetch('/inventory/history'),
-        apiFetch('/almacen/items')
+        apiFetch('/almacen/items'),
+        apiFetch('/inventory/real-time')
       ]);
       if (presRes.ok) setPresentaciones(await presRes.json());
       if (histRes.ok) setHistory(await histRes.json());
       if (invRes.ok) setInventoryItems(await invRes.json());
+      if (rtRes.ok) setRealTimeStock(await rtRes.json());
     } catch (e) {
       console.error(e);
     }
@@ -82,13 +91,15 @@ export default function Presentaciones() {
     setSelectedPresId(id);
     setSuccess('');
     if (id === 'NEW') {
-      setName(''); setWeight(''); setMinStock(''); setEnvaseId(''); setMielId('');
+      setName(''); setWeight(''); setMinStock(''); setCurrentStock(''); setEnvaseId(''); setMielId('');
     } else {
       const p = presentaciones.find(x => x.id === id);
       if (p) {
         setName(p.name);
         setWeight(p.weightGrams.toString());
         setMinStock(p.minStock.toString());
+        const stockInfo = realTimeStock.find(r => r.presentation_id === id);
+        setCurrentStock(stockInfo ? stockInfo.stock_actual.toString() : '0');
         // We don't fetch recipes for editing yet, so just leave envase/miel empty for existing
         setEnvaseId('');
         setMielId('');
@@ -135,12 +146,23 @@ export default function Presentaciones() {
         const res = await apiFetch(`/presentations/${selectedPresId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, minStock: Number(minStock) })
+          body: JSON.stringify({ name, weightGrams: Number(weight), minStock: Number(minStock) })
         });
-        if (res.ok) {
-          setSuccess('¡Presentación actualizada correctamente!');
+        
+        // Update stock force
+        const stockRes = await apiFetch(`/presentations/${selectedPresId}/stock`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_stock: Number(currentStock) })
+        });
+
+        if (res.ok && stockRes.ok) {
+          setSuccess('¡Presentación y stock actualizados correctamente!');
           fetchData();
           setTimeout(() => setSuccess(''), 3000);
+        } else {
+          console.error("Error updating presentation or stock", await res.text(), await stockRes.text());
+          alert("Hubo un error al actualizar. Puede que el servidor siga reiniciándose. Intenta de nuevo.");
         }
       }
     } catch (e) {
@@ -200,7 +222,6 @@ export default function Presentaciones() {
                     maxLength={100}
                     className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#ea580c]/40 focus:border-[#ea580c] font-medium text-gray-800"
                     placeholder="Ej. Frasco 500g Limón"
-                    disabled={selectedPresId !== 'NEW'} // Disable editing name for now if no PUT endpoint
                   />
                 </div>
                 <div>
@@ -220,9 +241,19 @@ export default function Presentaciones() {
                     required value={weight} onChange={e => setWeight(e.target.value)} type="number" min="1"
                     className="w-full bg-white/60 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#d97706]/30 focus:border-[#d97706] font-medium text-gray-800"
                     placeholder="500"
-                    disabled={selectedPresId !== 'NEW'}
                   />
                 </div>
+                {selectedPresId !== 'NEW' && (
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1.5 uppercase tracking-wide">Stock Físico (Editar sin movimiento)</label>
+                    <input
+                      required value={currentStock} onChange={e => setCurrentStock(e.target.value)} type="number" min="0" step="any"
+                      className="w-full bg-amber-50/50 border border-amber-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#d97706]/30 font-bold text-amber-900"
+                      placeholder="0"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-1 uppercase font-semibold">Cambiar este valor NO genera reporte.</p>
+                  </div>
+                )}
                 {selectedPresId === 'NEW' && (
                   <>
                     <div>

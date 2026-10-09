@@ -159,7 +159,7 @@ export default async function Dashboard() {
 
                 let kgTotales = 0;
                 if (isGalon) kgTotales = item.currentStock * 25;
-                else if (isCubeta) kgTotales = item.currentStock * 24.5;
+                else if (isCubeta) kgTotales = item.currentStock * 27;
 
                 return (
                   <div key={`raw-${item.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-amber-50/50 transition-colors">
@@ -184,14 +184,28 @@ export default async function Dashboard() {
               <h3 className="text-xs font-bold text-amber-600 uppercase tracking-wider">Envases Vacíos</h3>
             </div>
             <div className="divide-y divide-amber-100 max-h-[250px] overflow-y-auto">
-              {rawItems.filter(i => i.category === 'CONTAINER').map(item => (
-                <div key={`raw-${item.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-amber-50/50 transition-colors">
-                  <p className="font-semibold text-amber-900 text-sm">{item.name}</p>
-                  <p className={`font-bold text-sm ${item.currentStock <= item.minStock && item.isActive ? 'text-amber-600' : 'text-amber-900'}`}>
-                    {item.currentStock} und.
-                  </p>
-                </div>
-              ))}
+              {rawItems.filter(i => i.category === 'CONTAINER').map(item => {
+                let displayStock = item.currentStock;
+                let displayUnit = 'und.';
+                
+                const match = item.name.match(/(caja|paq) c\/(\d+)\s*pza/i);
+                if (match) {
+                  const piecesPerBox = parseInt(match[2], 10);
+                  if (piecesPerBox > 0) {
+                    displayStock = item.currentStock / piecesPerBox;
+                    displayUnit = match[1].toLowerCase().startsWith('caja') ? 'Cajas' : 'Paquetes';
+                  }
+                }
+
+                return (
+                  <div key={`raw-${item.id}`} className="flex items-center justify-between px-6 py-3 hover:bg-amber-50/50 transition-colors">
+                    <p className="font-semibold text-amber-900 text-sm">{item.name}</p>
+                    <p className={`font-bold text-sm ${item.currentStock <= item.minStock && item.isActive ? 'text-amber-600' : 'text-amber-900'}`}>
+                      {displayStock.toFixed(0)} {displayUnit}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

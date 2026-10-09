@@ -13,14 +13,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Con token y es login → redirigir al inicio
+  // Con token y es login → redirigir al inicio correspondiente
   if (token && isLoginPage) {
+    if (role !== 'SUPER_ADMIN') {
+      return NextResponse.redirect(new URL('/produccion', request.url));
+    }
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // Solo SUPER_ADMIN puede entrar a /usuarios
-  if (pathname.startsWith('/usuarios') && role !== 'SUPER_ADMIN') {
-    return NextResponse.redirect(new URL('/', request.url));
+  // Si no es SUPER_ADMIN, restringir rutas
+  if (token && role !== 'SUPER_ADMIN') {
+    // Solo permitir /produccion y /salidas
+    if (!pathname.startsWith('/produccion') && !pathname.startsWith('/salidas')) {
+      return NextResponse.redirect(new URL('/produccion', request.url));
+    }
   }
 
   return NextResponse.next();

@@ -41,6 +41,7 @@ interface SalidaMovement {
   itemType: string;
   category?: string;
   name: string;
+  presentationName?: string;
   movementType: string;
   quantity: number;
   referenceType: string;
@@ -97,7 +98,7 @@ export default function SalidasPage() {
         apiFetch('/presentations?is_active=eq.true'),
         apiFetch('/inventory/real-time'),
         apiFetch('/almacen/items'),
-        apiFetch('/inventory/salidas')
+        apiFetch('/inventory/history')
       ]);
 
       if (presRes.ok) {
@@ -181,6 +182,20 @@ export default function SalidasPage() {
     setPresSubmitting(false);
   };
 
+  const handleDeleteMovement = async (id: number) => {
+    if (!confirm('¿Estás seguro de que quieres borrar este registro? Esto lo eliminará del reporte de movimientos sin alterar el stock actual.')) return;
+    try {
+      const res = await apiFetch(`/inventory/history/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadData();
+      } else {
+        alert('Error al borrar el registro.');
+      }
+    } catch {
+      alert('Error de conexión.');
+    }
+  };
+
   // ── Salida de Almacén ────────────────────────────────────
   const handleWarehouseExit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,7 +204,7 @@ export default function SalidasPage() {
 
     const qty = Number(whQuantity);
     let baseQty = qty;
-    if (whFormat === 'CUBETA') baseQty = qty * 24.5;
+    if (whFormat === 'CUBETA') baseQty = qty * 27;
     if (whFormat === 'GALON') baseQty = qty * 25;
 
     const selectedItem = warehouseItems.find(i => i.id === Number(whItemId));
@@ -569,15 +584,15 @@ export default function SalidasPage() {
             )}
           </div>
 
-          {/* Historial de Salidas */}
+          {/* Historial de Movimientos */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_4px_25px_rgb(0,0,0,0.05)] border border-amber-200/80">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-amber-100">
               <div>
                 <h3 className="text-lg font-black text-amber-900">
-                  Historial de Salidas Recientes
+                  Historial de Movimientos Recientes
                 </h3>
                 <p className="text-xs text-amber-500 mt-0.5">
-                  Últimos movimientos de baja y salidas confirmadas.
+                  Últimos movimientos (Entradas y Salidas).
                 </p>
               </div>
               <span className="px-3 py-1 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-black">
@@ -587,16 +602,16 @@ export default function SalidasPage() {
 
             {isLoading ? (
               <div className="py-12 text-center text-amber-400 font-semibold text-sm">
-                Cargando historial de salidas...
+                Cargando historial de movimientos...
               </div>
             ) : salidasHistory.length === 0 ? (
               <div className="py-12 text-center">
                 <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-400 flex items-center justify-center mx-auto mb-3">
                   <PackageMinusIcon className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-bold text-amber-600">Aún no se han registrado salidas</p>
+                <p className="text-sm font-bold text-amber-600">Aún no se han registrado movimientos</p>
                 <p className="text-xs text-amber-400 mt-1">
-                  Usa el formulario arriba para registrar la primera salida de producto o insumo.
+                  Aquí aparecerán las entradas y salidas registradas.
                 </p>
               </div>
             ) : (
@@ -609,6 +624,7 @@ export default function SalidasPage() {
                       <th className="py-3 px-4 font-bold">Cantidad</th>
                       <th className="py-3 px-4 font-bold">Motivo</th>
                       <th className="py-3 px-4 font-bold">Tipo</th>
+                      <th className="py-3 px-4 font-bold"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-amber-100 font-medium">
@@ -618,10 +634,10 @@ export default function SalidasPage() {
                           {formatDate(item.movementDate)}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-amber-900">
-                          {item.name}
+                          {item.presentationName || item.name}
                         </td>
-                        <td className="py-3.5 px-4 font-black text-red-700 whitespace-nowrap">
-                          -{item.quantity} {item.itemType === 'PRESENTATION' ? 'pzas' : ''}
+                        <td className={`py-3.5 px-4 font-black whitespace-nowrap ${item.movementType === 'IN' ? 'text-emerald-600' : 'text-red-700'}`}>
+                          {item.movementType === 'IN' ? '+' : '-'}{item.quantity} {item.itemType === 'PRESENTATION' ? 'pzas' : ''}
                         </td>
                         <td className="py-3.5 px-4 text-amber-600">
                           <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/60">
@@ -630,6 +646,15 @@ export default function SalidasPage() {
                         </td>
                         <td className="py-3.5 px-4 text-amber-500 text-xs whitespace-nowrap">
                           {item.itemType === 'PRESENTATION' ? 'Terminado' : 'Almacén'}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            onClick={() => handleDeleteMovement(item.id)}
+                            title="Borrar del registro de movimientos"
+                            className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
                         </td>
                       </tr>
                     ))}

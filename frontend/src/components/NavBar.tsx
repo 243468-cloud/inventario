@@ -12,14 +12,19 @@ export default function NavBar({ role }: NavBarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  const links = [
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+
+  const links = isSuperAdmin ? [
     { href: '/', label: 'Dashboard', icon: <DashboardIcon /> },
-    { href: '/almacen', label: 'Almacén', icon: <HexagonIcon /> }, // Using HexagonIcon for raw materials
+    { href: '/almacen', label: 'Almacén', icon: <HexagonIcon /> }, 
     { href: '/presentaciones', label: 'Presentaciones', icon: <PackageIcon /> },
     { href: '/produccion', label: 'Producción', icon: <BeakerIcon /> },
     { href: '/salidas', label: 'Salidas', icon: <PackageMinusIcon /> },
     { href: '/precios', label: 'Costos y Precios', icon: <HexagonIcon /> },
-    ...(role === 'SUPER_ADMIN' ? [{ href: '/usuarios', label: 'Usuarios', icon: <UsersIcon /> }] : []),
+    { href: '/usuarios', label: 'Usuarios', icon: <UsersIcon /> },
+  ] : [
+    { href: '/produccion', label: 'Producción', icon: <BeakerIcon /> },
+    { href: '/salidas', label: 'Salidas', icon: <PackageMinusIcon /> },
   ];
 
   const isActive = (href: string) =>
@@ -104,19 +109,21 @@ export default function NavBar({ role }: NavBarProps) {
             </Link>
           ))}
           
-          {/* "Más" Tab */}
-          <button
-            onClick={() => setOpen(!open)}
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors
-              ${open ? 'text-amber-600' : 'text-amber-900/40 hover:text-amber-900/60'}`}
-          >
-            <div className={`${open ? 'bg-amber-100 text-amber-700' : ''} p-1.5 rounded-xl transition-all`}>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
-              </svg>
-            </div>
-            <span className="text-[10px] font-bold tracking-wide">Más</span>
-          </button>
+          {/* "Más" Tab - Solo visible si hay más de 3 links (ej. para SUPER_ADMIN) */}
+          {links.length > 3 && (
+            <button
+              onClick={() => setOpen(!open)}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors
+                ${open ? 'text-amber-600' : 'text-amber-900/40 hover:text-amber-900/60'}`}
+            >
+              <div className={`${open ? 'bg-amber-100 text-amber-700' : ''} p-1.5 rounded-xl transition-all`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+                </svg>
+              </div>
+              <span className="text-[10px] font-bold tracking-wide">Más</span>
+            </button>
+          )}
         </div>
       </div>
 

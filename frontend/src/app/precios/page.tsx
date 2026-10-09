@@ -9,14 +9,17 @@ export default function CostosYPrecios() {
   const [bulkCost, setBulkCost] = useState<number>(0);
   const [editingBulkCost, setEditingBulkCost] = useState<string>('');
   const [presentaciones, setPresentaciones] = useState<Presentacion[]>([]);
+  const [prices, setPrices] = useState<Record<number, number>>({});
+
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   const fetchData = async () => {
     try {
-      const [bulkRes, presRes] = await Promise.all([
+      const [bulkRes, presRes, realTimeRes] = await Promise.all([
         apiFetch('/costs/bulk-honey'),
-        apiFetch('/presentations')
+        apiFetch('/presentations'),
+        apiFetch('/inventory/real-time')
       ]);
       if (bulkRes.ok) {
         const costData = await bulkRes.json();
@@ -25,6 +28,14 @@ export default function CostosYPrecios() {
       }
       if (presRes.ok) {
         setPresentaciones(await presRes.json());
+      }
+      if (realTimeRes.ok) {
+        const rtData = await realTimeRes.json();
+        const priceMap: Record<number, number> = {};
+        rtData.forEach((item: any) => {
+          priceMap[item.presentation_id] = item.precio_venta_vigente;
+        });
+        setPrices(priceMap);
       }
     } catch (e) {
       console.error('Error fetching data', e);
@@ -63,6 +74,22 @@ export default function CostosYPrecios() {
       if (res.ok) {
         setPresentaciones(prev => prev.map(p => p.id === id ? { ...p, containerCost: newCost } : p));
         showSuccess('Costo de envase guardado.');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUpdateSalePrice = async (id: number, newPrice: number) => {
+    try {
+      const res = await apiFetch(`/presentations/${id}/sale-price`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sale_price: newPrice })
+      });
+      if (res.ok) {
+        setPrices(prev => ({ ...prev, [id]: newPrice }));
+        showSuccess('Precio de venta guardado.');
       }
     } catch (e) {
       console.error(e);
@@ -142,7 +169,7 @@ export default function CostosYPrecios() {
                 <th className="p-5 font-bold">Costo Miel</th>
                 <th className="p-5 font-bold">Costo Envase</th>
                 <th className="p-5 font-bold text-[#92400e]">Costo Total</th>
-                <th className="p-5 font-bold text-emerald-700 bg-emerald-50/30">Sugerido 30%</th>
+                <th className="p-5 font-bold text-emerald-700 bg-emerald-50/30">Precio Público (Venta)</th>
                 <th className="p-5 font-bold text-blue-700 bg-blue-50/30">Sugerido 40%</th>
                 <th className="p-5 font-bold text-purple-700 bg-purple-50/30">Sugerido 50%</th>
               </tr>
@@ -195,8 +222,21 @@ export default function CostosYPrecios() {
                           ${totalCost.toFixed(2)}
                         </span>
                       </td>
-                      <td className="p-5 font-black text-emerald-700 bg-emerald-50/30">
-                        ${(totalCost * 1.3).toFixed(2)}
+                      <td className="p-5 font-black bg-emerald-50/30">
+                        <div className="relative w-28">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            defaultValue={prices[p.id] || 0}
+                            onBlur={(e) => {
+                              const val = Number(e.target.value);
+                              if (val !== prices[p.id]) handleUpdateSalePrice(p.id, val);
+                            }}
+                            className="w-full bg-white border border-emerald-200 rounded-lg py-1.5 pl-7 pr-2 text-sm font-bold text-emerald-700 focus:outline-none focus:border-emerald-500 shadow-sm"
+                          />
+                        </div>
                       </td>
                       <td className="p-5 font-black text-blue-700 bg-blue-50/30">
                         ${(totalCost * 1.4).toFixed(2)}

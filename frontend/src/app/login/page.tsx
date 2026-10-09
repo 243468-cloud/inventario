@@ -229,6 +229,11 @@ export default function Login() {
               placeholder={mode === 'login' ? 'Tu usuario' : 'Elige un nombre de usuario'}
               minLength={3}
               maxLength={20}
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="next"
             />
           </div>
 
@@ -247,6 +252,8 @@ export default function Login() {
                 placeholder="••••••••"
                 minLength={6}
                 maxLength={50}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                enterKeyHint={mode === 'login' ? 'go' : 'next'}
               />
               <button
                 type="button"
@@ -277,6 +284,8 @@ export default function Login() {
                 placeholder="Repite tu contraseña"
                 minLength={6}
                 maxLength={50}
+                autoComplete="new-password"
+                enterKeyHint="go"
               />
             </div>
           )}

@@ -26,8 +26,8 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}): Pro
     headers,
   });
 
-  // Si la sesión expiró (401), limpiar y redirigir al login
-  if (response.status === 401 && typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
+  // Si la sesión expiró (401) o el token fue rechazado (403), limpiar y redirigir al login
+  if ((response.status === 401 || response.status === 403) && typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
     const isHttps = window.location.protocol === 'https:';
     const secureFlag = isHttps ? '; Secure' : '';
     document.cookie = `auth_token=; Max-Age=0; path=/; SameSite=Lax${secureFlag}`;

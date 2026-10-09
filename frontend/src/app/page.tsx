@@ -19,7 +19,7 @@ const StarIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-async function getInventory(): Promise<InventoryItem[]> {
+async function getInventory(): Promise<{ data: InventoryItem[], error?: string }> {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   try {
@@ -27,14 +27,14 @@ async function getInventory(): Promise<InventoryItem[]> {
       cache: 'no-store',
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
+    if (!res.ok) return { data: [], error: `Error ${res.status}: ${await res.text()}` };
+    return { data: await res.json() };
+  } catch (err: any) {
+    return { data: [], error: `Fetch error: ${err.message}` };
   }
 }
 
-async function getInventoryItems(): Promise<any[]> {
+async function getInventoryItems(): Promise<{ data: any[], error?: string }> {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value;
   try {
@@ -42,10 +42,10 @@ async function getInventoryItems(): Promise<any[]> {
       cache: 'no-store',
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch {
-    return [];
+    if (!res.ok) return { data: [], error: `Error ${res.status}: ${await res.text()}` };
+    return { data: await res.json() };
+  } catch (err: any) {
+    return { data: [], error: `Fetch error: ${err.message}` };
   }
 }
 
@@ -53,11 +53,15 @@ export default async function Dashboard() {
   const cookieStore = await cookies();
   const token = cookieStore.get('auth_token')?.value || '';
   const role = cookieStore.get('user_role')?.value || '';
-  const [inventory, rawItems] = await Promise.all([
+  const [inventoryResult, rawItemsResult] = await Promise.all([
     getInventory(),
     getInventoryItems()
   ]);
   
+  const inventory = inventoryResult.data;
+  const rawItems = rawItemsResult.data;
+  const fetchError = inventoryResult.error || rawItemsResult.error;
+
   const totalValue = inventory.reduce((sum, item) => sum + (item.valor_total_stock || 0), 0);
   const totalItems = inventory.reduce((sum, item) => sum + item.stock_actual, 0);
   const lowStockCount = inventory.filter(item => item.low_stock_alert).length;
@@ -78,6 +82,25 @@ export default async function Dashboard() {
         {/* Los empleados no pueden ver ni descargar reportes Excel/PDF */}
         <ExportButtons token={token} role={role} />
       </div>
+
+      {fetchError && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md shadow-sm">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error al cargar datos</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{fetchError}</p>
+                <p className="mt-1">URL: {API_URL}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards Minimalistas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
